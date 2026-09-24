@@ -147,7 +147,7 @@
       const isCur = idxs.includes(ci);
       const target = idxs.find((i) => unlocked(i) && !(p && p.done[STEPS[i].s.id])) ?? first;
       const row = h("button", { class: "mod-row" + (isCur ? " cur" : ""), disabled: !unlocked(first), "aria-current": isCur ? "true" : null, onclick: () => go(isCur ? ci : target) },
-        badge(complete ? "done" : "todo", m.num),
+        badge("todo", m.num),   // modules always show their number; checks live on the steps
         h("span", { class: "mod-t" }, h("span", { class: "mt", text: m.title }), h("span", { class: "ms", text: `${doneN}/${m.steps.length} · ${m.minutes} min` })));
       const li = h("li", { class: "mod" + (complete ? " complete" : "") }, row);
       if (isCur) {

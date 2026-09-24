@@ -71,8 +71,7 @@ main textarea, main input { -webkit-user-select: text; user-select: text; }
 .mod-t .ms { font-size: 13px; color: var(--grey); margin-top: 2px; }
 /* module badge: navy number → green circle + green check when complete */
 .badge-c { flex: none; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 15px; background: var(--navy-mid); color: #fff; }
-.badge-c.blank.todo { background: #fff; border: 2px solid var(--mist); }
-.badge-c.done { background: var(--mint-tint); border: 2px solid var(--mint-mid); color: var(--mint-mid); }
+.badge-c.blank { visibility: hidden; }   /* Start Here: no number, keep title alignment */
 .badge-c svg { width: 18px; height: 18px; }
 .steps { list-style: none; margin: 2px 0 8px; padding: 0 0 0 30px; }
 .steps .step { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; background: none; border: 0; border-radius: 8px; padding: 6px 10px; font-size: 14px; color: var(--ink); }

@@ -92,70 +92,82 @@
 
   /* ---------------- layout ---------------- */
   const app = document.getElementById("app");
-  let sidebar, mainEl, meterBar, meterTime, meterSub, trackTxt;
-  const CHECK = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-6.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  let sidebar, mainEl, ringVal, meterTime, meterSub, trackTxt;
+  const CHECK = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-6.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const CHEV = '<svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const RING_C = 2 * Math.PI * 14;
+  const openMods = new Set();          // sections the learner expanded (current one is always open)
   function shell() {
     app.innerHTML = "";
-    const menu = h("button", { class: "menu-btn", text: "Menu", "aria-label": "Open course menu", onclick: () => { setHdr(); document.body.classList.toggle("nav-open"); } });
-    meterBar = h("i"); meterTime = h("b"); meterSub = h("span"); trackTxt = h("span", { class: "trk" });
+    const menu = h("button", { class: "menu-btn", text: "Contents", "aria-label": "Open course contents", onclick: () => { setHdr(); document.body.classList.toggle("nav-open"); } });
+    meterTime = h("b"); meterSub = h("span"); trackTxt = h("span", { class: "trk" });
+    const ring = h("span", { html: `<svg class="ring" viewBox="0 0 34 34" aria-hidden="true"><circle class="trk-c" cx="17" cy="17" r="14"/><circle class="val-c" cx="17" cy="17" r="14" stroke-dasharray="${RING_C}" stroke-dashoffset="${RING_C}" transform="rotate(-90 17 17)"/></svg>` });
+    ringVal = ring.querySelector(".val-c");
     app.append(
       h("header", { class: "topbar" },
-        h("div", { class: "topbar-in" },
-          menu,
-          h("div", { class: "brand" }, h("span", { class: "ttl", text: RAW.title }), trackTxt),
-          h("div", { class: "spacer" }),
-          h("div", { class: "meter", "aria-live": "off" }, meterTime, meterSub)),
-        h("div", { class: "bar", role: "progressbar", "aria-label": "Course progress", "aria-valuemin": "0", "aria-valuemax": "100" }, meterBar)),
-      h("div", { class: "layout" }, (sidebar = h("nav", { class: "sidebar", "aria-label": "Course contents" })), (mainEl = h("main", { id: "main", tabindex: "-1" }))),
-      h("footer", { class: "foot", text: RAW.copyright }));
+        menu,
+        h("div", { class: "brand" }, h("span", { class: "prog", text: RAW.program }), h("span", { class: "ttl", text: RAW.title }), trackTxt),
+        h("div", { class: "spacer" }),
+        h("div", { class: "meter", role: "progressbar", "aria-label": "Course progress", "aria-valuemin": "0", "aria-valuemax": "100" }, ring, h("span", { class: "mtxt" }, meterTime, meterSub))),
+      h("div", { class: "layout" }, (sidebar = h("nav", { class: "sidebar", "aria-label": "Course content" })), (mainEl = h("main", { id: "main", tabindex: "-1" }))));
     if (window.ResizeObserver) new ResizeObserver(setHdr).observe(app.querySelector(".topbar"));
     window.addEventListener("resize", setHdr);
     document.addEventListener("click", (e) => { if (document.body.classList.contains("nav-open") && !e.target.closest(".sidebar") && !e.target.closest(".menu-btn")) document.body.classList.remove("nav-open"); });
   }
-  // mobile drawer sits under the header, whose height changes with the path label
+  // mobile drawer sits under the header
   function setHdr() { const t = app.querySelector(".topbar"); if (t) document.documentElement.style.setProperty("--hdr", t.offsetHeight + "px"); }
   const pctDone = () => { const p = P(); return p ? Math.round((STEPS.filter(({ s }) => p.done[s.id]).length / STEPS.length) * 100) : 0; };
   function updateMeter() {
     const p = P(); const pct = pctDone();
-    meterBar.style.width = pct + "%"; meterBar.parentElement.setAttribute("aria-valuenow", pct);
-    meterTime.textContent = p ? fmtTime(p.secs) : "";
-    meterSub.textContent = p ? `time invested · ${pct}% complete` : "";
-    const t = pathKey() ? `${RAW.program} · ${roleLabel()} · ${fnLabel()}` : RAW.program;
+    ringVal.setAttribute("stroke-dashoffset", RING_C * (1 - pct / 100));
+    ringVal.closest(".meter").setAttribute("aria-valuenow", pct);
+    meterTime.textContent = `${pct}% complete`;
+    meterSub.textContent = p ? `${fmtTime(p.secs)} invested` : "Your progress";
+    const t = pathKey() ? `${roleLabel()} · ${fnLabel()}` : "";
     if (trackTxt.textContent !== t) { trackTxt.textContent = t; setHdr(); }
-    const pc = sidebar && sidebar.querySelector(".pc-pct"); if (pc) pc.textContent = pct + "% complete";
-    const pt = sidebar && sidebar.querySelector(".pc-time"); if (pt && p) pt.textContent = fmtTime(p.secs);
+    const ss = sidebar && sidebar.querySelector(".side-h .ss"); if (ss) ss.textContent = `${pct}% complete · ${p ? fmtTime(p.secs) : "0 min"} invested`;
+    const sb = sidebar && sidebar.querySelector(".side-h .sbar i"); if (sb) sb.style.width = pct + "%";
   }
-  function badge(state, label) {   // state: done | todo ; label: number or ""
-    return h("span", { class: "badge-c " + state + (label ? "" : " blank"), "aria-hidden": "true", html: state === "done" ? CHECK : label });
+  // what kind of lesson a step is, shown under its title (like "Video · 4 min" on course platforms)
+  function lessonType(s) {
+    const t = s.blocks.map((b) => (b.t === "activity" ? "activity:" + b.a.type : b.t));
+    if (t.includes("final")) return "Graded knowledge check";
+    if (t.includes("cert")) return "Certificate";
+    if (t.includes("quiz")) return "Quiz";
+    if (t.includes("activity:sim")) return "Simulation";
+    if (t.some((x) => x.startsWith("activity:"))) return "Activity";
+    if (t.includes("reflect") || t.includes("scale")) return "Exercise";
+    return "Reading";
   }
   function renderSidebar() {
-    const p = P(); const ci = curIndex();
+    const p = P(); const ci = curIndex(); const pct = pctDone();
     sidebar.innerHTML = "";
-    const sc = p ? scores() : null;
-    sidebar.append(h("div", { class: "pcard" },
-      h("div", { class: "pc-k", text: "Your progress" }),
-      h("div", { class: "pc-pct", text: pctDone() + "% complete" }),
-      h("div", { class: "pc-row" },
-        h("div", {}, h("span", { text: "Time" }), h("b", { class: "pc-time", text: p ? fmtTime(p.secs) : "—" })),
-        h("div", {}, h("span", { text: "Knowledge check" }), h("b", { text: sc && sc.final != null ? sc.final + "%" : "—" })))));
+    sidebar.append(h("div", { class: "side-h" },
+      h("div", { class: "st", text: "Course content" }),
+      h("div", { class: "ss", text: `${pct}% complete · ${p ? fmtTime(p.secs) : "0 min"} invested` }),
+      h("div", { class: "sbar", "aria-hidden": "true" }, h("i", { style: `width:${pct}%` }))));
     const list = h("ol", { class: "mods" });
     let gi = 0;
     C.modules.forEach((m) => {
       const first = gi, idxs = m.steps.map(() => gi++);
       const doneN = p ? m.steps.filter((s) => p.done[s.id]).length : 0;
-      const complete = doneN === m.steps.length;
       const isCur = idxs.includes(ci);
-      const target = idxs.find((i) => unlocked(i) && !(p && p.done[STEPS[i].s.id])) ?? first;
-      const row = h("button", { class: "mod-row" + (isCur ? " cur" : ""), disabled: !unlocked(first), "aria-current": isCur ? "true" : null, onclick: () => go(isCur ? ci : target) },
-        badge("todo", m.num),   // modules always show their number; checks live on the steps
-        h("span", { class: "mod-t" }, h("span", { class: "mt", text: m.title }), h("span", { class: "ms", text: `${doneN}/${m.steps.length} · ${m.minutes} min` })));
-      const li = h("li", { class: "mod" + (complete ? " complete" : "") }, row);
-      if (isCur) {
+      const open = isCur || openMods.has(m.id);
+      const li = h("li", { class: "mod" + (isCur ? " cur" : "") + (open ? " open" : "") });
+      const row = h("button", { class: "mod-row", "aria-expanded": open ? "true" : "false", onclick: () => { if (isCur) return; openMods.has(m.id) ? openMods.delete(m.id) : openMods.add(m.id); renderSidebar(); } },
+        h("span", { class: "mod-num" + (m.num ? "" : " blank"), "aria-hidden": "true", text: m.num }),
+        h("span", { class: "mod-t" }, h("span", { class: "mt", text: m.num ? m.title : m.title }), h("span", { class: "ms", text: `${doneN} / ${m.steps.length} · ${m.minutes} min` })),
+        h("span", { html: CHEV }));
+      if (isCur) row.disabled = false;
+      li.append(row);
+      if (open) {
         const ol = h("ol", { class: "steps" });
         m.steps.forEach((s, k) => {
           const i = idxs[k], ok = unlocked(i), dn = p && p.done[s.id];
           ol.append(h("li", {}, h("button", { class: "step" + (dn ? " done" : "") + (i === ci ? " cur" : ""), disabled: !ok, "aria-current": i === ci ? "step" : null, onclick: () => go(i) },
-            h("span", { class: "dot", "aria-hidden": "true", html: dn ? CHECK : "" }), h("span", { text: s.title }), dn ? h("span", { class: "sr-only", text: " (completed)" }) : null)));
+            h("span", { class: "dot", "aria-hidden": "true", html: dn ? CHECK : "" }),
+            h("span", { class: "stx" }, h("span", { text: s.title }), h("span", { class: "stype", text: lessonType(s) })),
+            dn ? h("span", { class: "sr-only", text: " (completed)" }) : null)));
         });
         li.append(ol);
       }
@@ -164,13 +176,18 @@
     sidebar.append(list);
     const foot = h("div", { class: "side-foot" });
     if (pathKey()) {
-      foot.append(h("div", {}, "Path: ", h("strong", { text: `${roleLabel()} · ${fnLabel()}` }), " ", h("button", { class: "linkbtn", text: "Change", onclick: () => go(0) })));
+      const sc = scores();
+      foot.append(h("div", { class: "kv" },
+        h("div", {}, h("span", { text: "Time invested" }), h("b", { text: fmtTime(p.secs) })),
+        h("div", {}, h("span", { text: "Knowledge check" }), h("b", { text: sc.final != null ? sc.final + "%" : "—" }))));
+      foot.append(h("div", {}, "Path: ", h("strong", { text: `${roleLabel()} · ${fnLabel()}` }), " · ", h("button", { class: "linkbtn", text: "Change", onclick: () => go(0) })));
       foot.append(h("button", { class: "linkbtn", text: "Download PDF of my answers", onclick: downloadPDF }));
       foot.append(h("button", { class: "linkbtn", text: "Reset progress on this path", onclick: () => {
         if (!confirm(`Reset all progress, answers and time for the ${roleLabel()} · ${fnLabel()} path? This can't be undone.`)) return;
         delete store.paths[pathKey()]; saveNow(); go(0);
       } }));
     }
+    foot.append(h("div", { class: "note", style: "font-size:11.5px;margin-top:6px", text: RAW.copyright }));
     sidebar.append(foot);
   }
 
@@ -190,15 +207,21 @@
     renderSidebar(); updateMeter();
     mainEl.innerHTML = "";
     const page = h("div", { class: "page" });
-    if (!(s.blocks[0] && s.blocks[0].t === "hero"))
-      page.append(h("div", { class: "kicker", text: `${m.num ? "Module " + m.num + " · " : ""}${s.kicker || m.title}` }), h("h1", { class: "step-title", html: s.title }));
+    if (!(s.blocks[0] && s.blocks[0].t === "hero")) {
+      const k = m.steps.indexOf(s);
+      page.append(h("div", { class: "crumb" },
+        h("b", { text: m.num ? `Module ${m.num}` : m.title }), m.num ? h("span", { text: m.title.split(":")[0] }) : null,
+        h("span", { class: "sep", text: "•" }), h("span", { text: `Lesson ${k + 1} of ${m.steps.length}` })),
+        h("h1", { class: "step-title", html: s.title }));
+    }
     s.blocks.forEach((b, bi) => { const el = renderBlock(b, s.blocks[bi + 1]); if (el) page.append(h("div", { class: "block" }, el)); });
-    const prev = h("button", { class: "btn ghost", text: "← Back", disabled: i === 0, onclick: () => go(i - 1) });
+    const prev = h("button", { class: "btn ghost", text: "← Previous", disabled: i === 0, onclick: () => go(i - 1) });
     gateEl = h("span", { class: "gate" });
-    nextBtn = h("button", { class: "btn", text: i === STEPS.length - 1 ? "Finish" : "Continue →", onclick: () => { if (i < STEPS.length - 1) go(i + 1); } });
-    if (i === STEPS.length - 1) nextBtn.style.display = "none";
-    page.append(h("div", { class: "step-nav" }, prev, gateEl, nextBtn));
-    mainEl.append(page);
+    const last = i === STEPS.length - 1;
+    nextBtn = h("button", { class: "btn", text: "Next →", onclick: () => { if (!last) go(i + 1); } });
+    const nextWrap = h("div", { class: "next-wrap" });
+    if (!last) nextWrap.append(h("div", { class: "upnext" }, h("span", { text: "Up next" }), h("b", { text: STEPS[i + 1].s.title })), nextBtn);
+    mainEl.append(page, h("div", { class: "step-nav" }, prev, gateEl, nextWrap));
     gate();
   }
   function gate() {

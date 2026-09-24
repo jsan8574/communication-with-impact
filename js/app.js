@@ -54,7 +54,7 @@
     switch (b.t) {
       case "track": return !!pathKey();
       case "activity": return !!(p.act[b.a.id] && p.act[b.a.id].complete);
-      case "reflect": if (b.optional) return true; { const r = p.refl[b.id]; return !!(r && (r.submitted || r.optout)); }
+      case "reflect": { const r = p.refl[b.id]; return !!(r && r.submitted); }
       case "scale": return p.scale[b.id] != null;
       case "choice": return p.choice[b.id] != null;
       case "quiz": { const q = p.quiz[b.id]; return !!q && b.questions.every((_, i) => q.checked && q.checked[i]); }
@@ -92,17 +92,20 @@
 
   /* ---------------- layout ---------------- */
   const app = document.getElementById("app");
-  let sidebar, mainEl, meterBar, meterTxt, trackTxt;
+  let sidebar, mainEl, meterBar, meterTime, meterSub, trackTxt;
+  const CHECK = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-6.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   function shell() {
     app.innerHTML = "";
-    const menu = h("button", { class: "menu-btn", text: "Menu", "aria-label": "Open course menu", onclick: () => document.body.classList.toggle("nav-open") });
-    meterBar = h("i"); meterTxt = h("span", { class: "txt" }); trackTxt = h("span", { class: "trk" });
+    const menu = h("button", { class: "menu-btn", text: "Menu", "aria-label": "Open course menu", onclick: () => { setHdr(); document.body.classList.toggle("nav-open"); } });
+    meterBar = h("i"); meterTime = h("b"); meterSub = h("span"); trackTxt = h("span", { class: "trk" });
     app.append(
       h("header", { class: "topbar" },
-        menu,
-        h("div", { class: "brand" }, h("span", { class: "prog", text: RAW.program }), h("span", { class: "ttl", text: RAW.title }), trackTxt),
-        h("div", { class: "spacer" }),
-        h("div", { class: "meter" }, meterTxt, h("div", { class: "bar", role: "progressbar", "aria-label": "Course progress" }, meterBar))),
+        h("div", { class: "topbar-in" },
+          menu,
+          h("div", { class: "brand" }, h("span", { class: "ttl", text: RAW.title }), trackTxt),
+          h("div", { class: "spacer" }),
+          h("div", { class: "meter", "aria-live": "off" }, meterTime, meterSub)),
+        h("div", { class: "bar", role: "progressbar", "aria-label": "Course progress", "aria-valuemin": "0", "aria-valuemax": "100" }, meterBar)),
       h("div", { class: "layout" }, (sidebar = h("nav", { class: "sidebar", "aria-label": "Course contents" })), (mainEl = h("main", { id: "main", tabindex: "-1" }))),
       h("footer", { class: "foot", text: RAW.copyright }));
     if (window.ResizeObserver) new ResizeObserver(setHdr).observe(app.querySelector(".topbar"));
@@ -111,27 +114,54 @@
   }
   // mobile drawer sits under the header, whose height changes with the path label
   function setHdr() { const t = app.querySelector(".topbar"); if (t) document.documentElement.style.setProperty("--hdr", t.offsetHeight + "px"); }
+  const pctDone = () => { const p = P(); return p ? Math.round((STEPS.filter(({ s }) => p.done[s.id]).length / STEPS.length) * 100) : 0; };
   function updateMeter() {
-    const p = P();
-    const total = STEPS.length, done = p ? STEPS.filter(({ s }) => p.done[s.id]).length : 0;
-    const pct = Math.round((done / total) * 100);
+    const p = P(); const pct = pctDone();
     meterBar.style.width = pct + "%"; meterBar.parentElement.setAttribute("aria-valuenow", pct);
-    meterTxt.textContent = p ? `${pct}% · ${fmtTime(p.secs)}` : "";
-    const t = pathKey() ? `${roleLabel()} · ${fnLabel()}` : "Choose your path to begin";
+    meterTime.textContent = p ? fmtTime(p.secs) : "";
+    meterSub.textContent = p ? `time invested · ${pct}% complete` : "";
+    const t = pathKey() ? `${RAW.program} · ${roleLabel()} · ${fnLabel()}` : RAW.program;
     if (trackTxt.textContent !== t) { trackTxt.textContent = t; setHdr(); }
+    const pc = sidebar && sidebar.querySelector(".pc-pct"); if (pc) pc.textContent = pct + "% complete";
+    const pt = sidebar && sidebar.querySelector(".pc-time"); if (pt && p) pt.textContent = fmtTime(p.secs);
+  }
+  function badge(state, label) {   // state: done | todo ; label: number or ""
+    return h("span", { class: "badge-c " + state + (label ? "" : " blank"), "aria-hidden": "true", html: state === "done" ? CHECK : label });
   }
   function renderSidebar() {
     const p = P(); const ci = curIndex();
     sidebar.innerHTML = "";
+    const sc = p ? scores() : null;
+    sidebar.append(h("div", { class: "pcard" },
+      h("div", { class: "pc-k", text: "Your progress" }),
+      h("div", { class: "pc-pct", text: pctDone() + "% complete" }),
+      h("div", { class: "pc-row" },
+        h("div", {}, h("span", { text: "Time" }), h("b", { class: "pc-time", text: p ? fmtTime(p.secs) : "—" })),
+        h("div", {}, h("span", { text: "Knowledge check" }), h("b", { text: sc && sc.final != null ? sc.final + "%" : "—" })))));
+    const list = h("ol", { class: "mods" });
     let gi = 0;
     C.modules.forEach((m) => {
-      const ol = h("ol");
-      m.steps.forEach((s) => {
-        const i = gi++; const ok = unlocked(i);
-        ol.append(h("li", {}, h("button", { class: (p && p.done[s.id] ? "done " : "") + (i === ci ? "cur" : ""), disabled: !ok, "aria-current": i === ci ? "step" : null, text: s.title, onclick: () => go(i) })));
-      });
-      sidebar.append(h("div", { class: "mod" }, h("div", { class: "mod-h" }, h("span", { class: "n", text: m.num }), h("span", { text: m.title }), h("span", { class: "mins", text: m.minutes + " min" })), ol));
+      const first = gi, idxs = m.steps.map(() => gi++);
+      const doneN = p ? m.steps.filter((s) => p.done[s.id]).length : 0;
+      const complete = doneN === m.steps.length;
+      const isCur = idxs.includes(ci);
+      const target = idxs.find((i) => unlocked(i) && !(p && p.done[STEPS[i].s.id])) ?? first;
+      const row = h("button", { class: "mod-row" + (isCur ? " cur" : ""), disabled: !unlocked(first), "aria-current": isCur ? "true" : null, onclick: () => go(isCur ? ci : target) },
+        badge(complete ? "done" : "todo", m.num),
+        h("span", { class: "mod-t" }, h("span", { class: "mt", text: m.title }), h("span", { class: "ms", text: `${doneN}/${m.steps.length} · ${m.minutes} min` })));
+      const li = h("li", { class: "mod" + (complete ? " complete" : "") }, row);
+      if (isCur) {
+        const ol = h("ol", { class: "steps" });
+        m.steps.forEach((s, k) => {
+          const i = idxs[k], ok = unlocked(i), dn = p && p.done[s.id];
+          ol.append(h("li", {}, h("button", { class: "step" + (dn ? " done" : "") + (i === ci ? " cur" : ""), disabled: !ok, "aria-current": i === ci ? "step" : null, onclick: () => go(i) },
+            h("span", { class: "dot", "aria-hidden": "true", html: dn ? CHECK : "" }), h("span", { text: s.title }), dn ? h("span", { class: "sr-only", text: " (completed)" }) : null)));
+        });
+        li.append(ol);
+      }
+      list.append(li);
     });
+    sidebar.append(list);
     const foot = h("div", { class: "side-foot" });
     if (pathKey()) {
       foot.append(h("div", {}, "Path: ", h("strong", { text: `${roleLabel()} · ${fnLabel()}` }), " ", h("button", { class: "linkbtn", text: "Change", onclick: () => go(0) })));
@@ -160,7 +190,8 @@
     renderSidebar(); updateMeter();
     mainEl.innerHTML = "";
     const page = h("div", { class: "page" });
-    page.append(h("div", { class: "kicker", text: `${m.num === "00" ? "" : "Module " + m.num + " · "}${s.kicker || m.title}` }), h("h1", { class: "step-title", html: s.title }));
+    if (!(s.blocks[0] && s.blocks[0].t === "hero"))
+      page.append(h("div", { class: "kicker", text: `${m.num ? "Module " + m.num + " · " : ""}${s.kicker || m.title}` }), h("h1", { class: "step-title", html: s.title }));
     s.blocks.forEach((b, bi) => { const el = renderBlock(b, s.blocks[bi + 1]); if (el) page.append(h("div", { class: "block" }, el)); });
     const prev = h("button", { class: "btn ghost", text: "← Back", disabled: i === 0, onclick: () => go(i - 1) });
     gateEl = h("span", { class: "gate" });
@@ -178,7 +209,7 @@
     if (done) gateEl.textContent = "";
     else {
       const b = s.blocks.find((b) => !blockDone(b, p || {}));
-      const why = { track: "Choose your role and function to begin.", activity: "Complete the activity to continue.", reflect: "Submit your answer (or tick “skip”) to continue.", scale: "Pick a number on the scale to continue.", choice: "Make a choice to continue.", quiz: "Check each answer to continue.", final: "Pass the Knowledge Check to continue." };
+      const why = { track: "Choose your role and function to begin.", activity: "Complete the activity to continue.", reflect: "Submit your answer to continue.", scale: "Pick a number on the scale to continue.", choice: "Make a choice to continue.", quiz: "Check each answer to continue.", final: "Pass the Knowledge Check to continue." };
       gateEl.textContent = why[b && b.t] || "";
     }
   }
@@ -204,6 +235,8 @@
           h("div", { class: "btn-row" }, h("button", { class: "btn secondary", text: "Print this checklist", onclick: () => window.print() })));
       }
       case "track": return trackPicker();
+      case "hero": return hero();
+      case "panelStart": return null;
       case "name": return nameField();
       case "scale": return scale(b);
       case "choice": return choice(b);
@@ -219,6 +252,15 @@
     return null;
   }
 
+  function hero() {
+    const audience = pathKey() ? `${roleLabel()}s · ${fnLabel()}` : "Team Leaders and Managers · RCM Operations and Non-Ops";
+    const meta = (k, v) => h("div", { class: "hm" }, h("span", { text: k }), h("b", { text: v }));
+    return h("section", { class: "hero" },
+      h("div", { class: "hk", text: "Self-paced course · " + RAW.program }),
+      h("h1", { class: "ht", text: RAW.title }),
+      h("p", { class: "hs", text: RAW.subtitle }),
+      h("div", { class: "hmeta" }, meta("Audience", audience), meta("Seat time", "About 60 minutes"), meta("Modules", `${C.modules.filter((m) => m.num).length} + certificate`), meta("Pass mark", `${C.passMark}% knowledge check`)));
+  }
   function trackPicker() {
     const box = h("div", { class: "panel" }, h("div", { class: "pt", text: "Choose your path" }),
       h("div", { class: "pi", text: "The examples, scenarios, simulation and quiz questions are written for your role and function. Your progress is saved separately for each path, so you can switch later without losing anything." }));
@@ -264,6 +306,14 @@
     wrap.append(row);
     return wrap;
   }
+  // Answers must be the learner's own words: block paste / drag-drop into answer boxes.
+  function noPaste(ta, msg) {
+    const stop = (e) => { e.preventDefault(); msg.className = "msg err"; msg.textContent = "Pasting is turned off here — please type your answer in your own words."; };
+    ta.addEventListener("paste", stop);
+    ta.addEventListener("drop", stop);
+    ta.addEventListener("beforeinput", (e) => { if (/^insertFrom(Paste|Drop|Yank)/.test(e.inputType || "")) stop(e); });
+    ta.setAttribute("autocomplete", "off"); ta.setAttribute("spellcheck", "true");
+  }
   function reflect(b) {
     const p = P();
     const r = (p.refl[b.id] = p.refl[b.id] || { v: {}, sc: {} });
@@ -275,38 +325,32 @@
       const ta = h("textarea", { id, rows: fd.rows || 3, placeholder: fd.placeholder || "" }); ta.value = r.v[fd.id] || "";
       const box = h("div", { class: "field" }, h("label", { for: id, html: fd.label }), ta);
       ta.addEventListener("input", () => { r.v[fd.id] = ta.value; box.classList.remove("err"); save(); });
+      noPaste(ta, msg);
       wrap.append(box); return { fd, ta, box };
     });
     if (b.note) wrap.append(h("p", { class: "note", html: b.note }));
     const after = h("div");
     const showAfter = () => {
       after.innerHTML = "";
-      if (!(r.submitted || r.optout)) return;
+      if (!r.submitted) return;
       if (b.selfcheck) after.append(h("div", { class: "selfcheck" }, h("div", { class: "ct", text: "Self-check" }), b.selfcheck.map((t, i) => { const cb = h("input", { type: "checkbox" }); cb.checked = !!r.sc[i]; cb.addEventListener("change", () => { r.sc[i] = cb.checked; save(); }); return h("label", {}, cb, h("span", { html: t })); })));
       if (b.model) after.append(h("div", { class: "model" }, h("div", { class: "ct", html: b.model.title }), h("div", { html: b.model.html })));
     };
-    if (b.optional) { wrap.append(h("p", { class: "note", text: "Optional — saved automatically as you type." })); return wrap; }
     const submit = h("button", { class: "btn", text: r.submitted ? "Update my answer" : "Submit my answer" });
     submit.addEventListener("click", () => {
-      const empty = fields.filter(({ ta }) => ta.value.trim().length < 3);
+      const thin = (v) => v.trim().length < 10 || v.trim().split(/\s+/).length < 3;   // needs a real sentence, not "ok"
+      const empty = fields.filter(({ ta }) => thin(ta.value));
       if (empty.length) {
         empty.forEach(({ box }) => box.classList.add("err"));
-        msg.className = "msg err"; msg.textContent = `✕ Please write something in ${empty.length === fields.length && fields.length > 1 ? "each box" : empty.length === 1 ? "the highlighted box" : "the highlighted boxes"} — or tick “skip” below if you'd rather reflect privately.`;
+        msg.className = "msg err"; msg.textContent = `✕ Add a sentence or two in your own words to ${empty.length === 1 ? "the highlighted box" : "each highlighted box"} before continuing.`;
         empty[0].ta.focus(); return;
       }
       fields.forEach(({ fd, ta }) => (r.v[fd.id] = ta.value));
-      r.submitted = true; r.optout = false; opt.checked = false; submit.textContent = "Update my answer";
+      r.submitted = true; submit.textContent = "Update my answer";
       msg.className = "msg ok"; msg.textContent = "✓ Saved. " + (b.model ? "Compare yours with the example below." : "");
       showAfter(); onChange();
     });
-    const opt = h("input", { type: "checkbox", id: "o_" + b.id }); opt.checked = !!r.optout;
-    opt.addEventListener("change", () => {
-      r.optout = opt.checked;
-      if (opt.checked) { msg.className = "msg"; msg.textContent = "Skipped — you can still come back and write an answer any time."; fields.forEach(({ box }) => box.classList.remove("err")); }
-      else msg.textContent = "";
-      showAfter(); onChange();
-    });
-    wrap.append(h("div", { class: "btn-row" }, submit), h("label", { class: "optout", for: "o_" + b.id }, opt, h("span", { text: "Skip this for now — I'll reflect on it privately" })), msg, after);
+    wrap.append(h("div", { class: "btn-row" }, submit), msg, after);
     showAfter();
     return wrap;
   }
@@ -517,28 +561,28 @@
     const F = (w, s, it) => `${it ? "italic " : ""}${w} ${s}px "Proxima Nova", "Helvetica Neue", Arial, sans-serif`;
     const spaced = (on) => { if ("letterSpacing" in ctx) ctx.letterSpacing = on ? "8px" : "0px"; };
     ctx.fillStyle = "#FFFFFF"; ctx.fillRect(0, 0, W, H);
-    ctx.fillStyle = "#283745"; ctx.fillRect(0, 0, W, 28); ctx.fillRect(0, H - 28, W, 28);
+    ctx.fillStyle = "#0B2545"; ctx.fillRect(0, 0, W, 28); ctx.fillRect(0, H - 28, W, 28);
     ctx.strokeStyle = "#D1DBE5"; ctx.lineWidth = 4; ctx.strokeRect(70, 90, W - 140, H - 180);
-    ctx.strokeStyle = "#70B4BD"; ctx.lineWidth = 2; ctx.strokeRect(90, 110, W - 180, H - 220);
-    const bars = ["#5290B7", "#70B4BD", "#86BBA7", "#4481C0"]; bars.forEach((c, i) => { ctx.fillStyle = c; ctx.fillRect(W / 2 - 160 + i * 80, 170, 70, 10); });
+    ctx.strokeStyle = "#1AA0A6"; ctx.lineWidth = 2; ctx.strokeRect(90, 110, W - 180, H - 220);
+    const bars = ["#1D5F8A", "#1AA0A6", "#2E9063", "#0F6E80"]; bars.forEach((c, i) => { ctx.fillStyle = c; ctx.fillRect(W / 2 - 160 + i * 80, 170, 70, 10); });
     ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
-    spaced(true); ctx.fillStyle = "#396E89"; ctx.font = F(700, 34); ctx.fillText(RAW.program.toUpperCase(), W / 2, 250);
-    spaced(false); ctx.fillStyle = "#283745"; ctx.font = F(700, 96); ctx.fillText("Certificate of Completion", W / 2, 370);
+    spaced(true); ctx.fillStyle = "#0F6E73"; ctx.font = F(700, 34); ctx.fillText(RAW.program.toUpperCase(), W / 2, 250);
+    spaced(false); ctx.fillStyle = "#0B2545"; ctx.font = F(700, 96); ctx.fillText("Certificate of Completion", W / 2, 370);
     ctx.fillStyle = "#7D8A90"; ctx.font = F(400, 38, true); ctx.fillText("This certifies that", W / 2, 470);
     const name = (store.name || "").trim() || "Your Name";
     let ns = 110; ctx.font = F(700, ns); while (ctx.measureText(name).width > W - 400 && ns > 50) { ns -= 4; ctx.font = F(700, ns); }
     ctx.fillStyle = (store.name || "").trim() ? "#1B1924" : "#AAA7BA"; ctx.fillText(name, W / 2, 600);
-    ctx.strokeStyle = "#70B4BD"; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(W / 2 - 520, 640); ctx.lineTo(W / 2 + 520, 640); ctx.stroke();
+    ctx.strokeStyle = "#1AA0A6"; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(W / 2 - 520, 640); ctx.lineTo(W / 2 + 520, 640); ctx.stroke();
     ctx.fillStyle = "#7D8A90"; ctx.font = F(400, 38, true); ctx.fillText("has successfully completed", W / 2, 715);
-    ctx.fillStyle = "#283745"; ctx.font = F(700, 72); ctx.fillText(RAW.title, W / 2, 810);
-    spaced(true); ctx.fillStyle = "#5290B7"; ctx.font = F(600, 30); ctx.fillText(`${roleLabel()} · ${fnLabel()}`.toUpperCase(), W / 2, 870); spaced(false);
+    ctx.fillStyle = "#0B2545"; ctx.font = F(700, 72); ctx.fillText(RAW.title, W / 2, 810);
+    spaced(true); ctx.fillStyle = "#1D5F8A"; ctx.font = F(600, 30); ctx.fillText(`${roleLabel()} · ${fnLabel()}`.toUpperCase(), W / 2, 870); spaced(false);
     const doneAt = (p.final && p.final.passedAt) || Date.now();
     const cols = [["TIME INVESTED", fmtTime(p.secs)], ["KNOWLEDGE CHECK", (sc.final != null ? sc.final : 0) + "%"], ["DATE COMPLETED", new Date(doneAt).toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric" })]];
     const cw = 480, x0 = W / 2 - cw;
     cols.forEach(([l, v], i) => {
       const x = x0 + i * cw;
       if (i) { ctx.strokeStyle = "#D1DBE5"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x - cw / 2, 975); ctx.lineTo(x - cw / 2, 1105); ctx.stroke(); }
-      ctx.fillStyle = "#283745"; ctx.font = F(700, 56); ctx.fillText(v, x, 1050);
+      ctx.fillStyle = "#0B2545"; ctx.font = F(700, 56); ctx.fillText(v, x, 1050);
       spaced(true); ctx.fillStyle = "#7D8A90"; ctx.font = F(600, 22); ctx.fillText(l, x, 1095); spaced(false);
     });
     ctx.fillStyle = "#7D8A90"; ctx.font = F(400, 22); ctx.fillText(RAW.copyright, W / 2, H - 140);
@@ -563,9 +607,9 @@
     };
     const rule = () => { ensure(14); doc.setDrawColor(209, 219, 229); doc.line(M, y, W - M, y); y += 14; };
     const sc = scores();
-    doc.setFillColor(40, 55, 69); doc.rect(0, 0, W, 8, "F");
-    text(RAW.program.toUpperCase(), { size: 9, bold: true, color: [57, 110, 137] });
-    text(RAW.title + " — My Answers", { size: 20, bold: true, color: [40, 55, 69] });
+    doc.setFillColor(11, 37, 69); doc.rect(0, 0, W, 8, "F");
+    text(RAW.program.toUpperCase(), { size: 9, bold: true, color: [15, 110, 115] });
+    text(RAW.title + " — My Answers", { size: 20, bold: true, color: [11, 37, 69] });
     text(`${(store.name || "").trim() || "(name not entered)"}  ·  ${roleLabel()} · ${fnLabel()}  ·  ${new Date().toLocaleDateString()}`, { size: 10, color: [125, 138, 144], gap: 10 });
     text(`Time invested: ${fmtTime(p.secs)}   |   Knowledge Check (best): ${sc.final != null ? sc.final + "%" + (sc.passed ? " — Passed" : "") : "not attempted"}   |   Checks for Understanding: ${sc.got}/${sc.tot} (${sc.cfuPct}%)`, { size: 10, bold: true });
     sc.rows.forEach((r) => text(`${r.label}: ${r.answered ? r.n + "/" + r.t : "not completed"}`, { size: 9.5, gap: 0 }));
@@ -578,7 +622,7 @@
         if (b.t === "reflect") {
           const r = p.refl[b.id] || { v: {} };
           const lines = [];
-          b.fields.forEach((fd) => lines.push([fd.label, (r.v[fd.id] || "").trim() || (r.optout ? "(skipped — reflected privately)" : "(not answered)")]));
+          b.fields.forEach((fd) => lines.push([fd.label, (r.v[fd.id] || "").trim() || "(not answered)"]));
           const sc2 = b.selfcheck ? b.selfcheck.map((t, i) => `[${r.sc && r.sc[i] ? "x" : " "}] ${t}`) : [];
           parts.push({ kind: "refl", title: `${s.title} — ${b.title || ""}`, lines, sc: sc2 });
         } else if (b.t === "activity") {
@@ -592,7 +636,7 @@
         else if (b.t === "checklist") parts.push({ kind: "check", items: b.items });
       }));
       if (!parts.length) return;
-      ensure(40); text(`Module ${m.num} · ${m.title}`, { size: 13, bold: true, color: [49, 97, 145], gap: 6 });
+      ensure(40); text(`${m.num ? "Module " + m.num + " · " : ""}${m.title}`, { size: 13, bold: true, color: [15, 110, 128], gap: 6 });
       parts.forEach((pt) => {
         if (pt.kind === "refl") {
           text(pt.title, { size: 10.5, bold: true, gap: 2 });
@@ -610,6 +654,12 @@
     text(RAW.copyright, { size: 8, color: [125, 138, 144] });
     doc.save(`${RAW.title} - My Answers - ${roleLabel()} ${fnLabel()}.pdf`.replace(/[\\/:*?"<>|]/g, ""));
   }
+
+  /* ---------------- copy protection ---------------- */
+  // Stops learners copying questions/scenarios into an AI tool. (It can't stop retyping or screenshots.)
+  const copyOK = (t) => t && t.closest && t.closest("#learner-name, #cert-name");
+  ["copy", "cut"].forEach((ev) => document.addEventListener(ev, (e) => { if (!copyOK(e.target)) e.preventDefault(); }, true));
+  document.addEventListener("dragstart", (e) => { if (!copyOK(e.target) && !(e.target.closest && e.target.closest(".chip"))) e.preventDefault(); }, true);
 
   /* ---------------- boot ---------------- */
   build(); shell(); render();

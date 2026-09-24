@@ -41,11 +41,13 @@
     modules: [
       /* ================================================================== */
       {
-        id: "m0", num: "00", title: "Start Here", minutes: 4,
+        id: "m0", num: "", title: "Start Here", minutes: 4,
         steps: [
           {
             id: "welcome", title: "Welcome", kicker: "Before you begin",
             blocks: [
+              { t: "hero" },
+              { t: "h3", text: "Before you begin" },
               { t: "lead", html: "At your level, communication is no longer only about making sure people understand what you said. It's about how well you <strong>frame issues, influence decisions, and build confidence</strong> — upward, across, and with your own team." },
               { t: "track" },
               { t: "name" },
@@ -82,10 +84,10 @@
 
       /* ================================================================== */
       {
-        id: "m1", num: "01", title: "Mindset: From Information to Influence", minutes: 12,
+        id: "m1", num: "1", title: "Mindset: From Information to Influence", minutes: 12,
         steps: [
           {
-            id: "changed", title: "Your Communication Has Changed", kicker: "01 · Mindset",
+            id: "changed", title: "Your Communication Has Changed", kicker: "Mindset",
             blocks: [
               { t: "p", html: "Stepping up changes the communication <em>requirement itself</em> — not just its polish." },
               { t: "compare",
@@ -120,7 +122,7 @@
             ]
           },
           {
-            id: "upgrade", title: "Information → Insight → Influence", kicker: "01 · Mindset",
+            id: "upgrade", title: "Information → Insight → Influence", kicker: "Mindset",
             blocks: [
               { t: "cards", cols: 3, numbered: true, items: V({
                 ops: [
@@ -171,7 +173,7 @@
             ]
           },
           {
-            id: "model", title: "The Master Message Model", kicker: "01 · Mindset",
+            id: "model", title: "The Master Message Model", kicker: "Mindset",
             blocks: [
               { t: "p", html: "Every tool in this course — SBAR, stakeholder translation, COIN — is a different lens on the same four questions. If you remember nothing else, remember these." },
               { t: "cards", cols: 4, numbered: true, items: [
@@ -220,7 +222,7 @@
             ]
           },
           {
-            id: "tryData", title: "Try It: Turn Data Into Influence", kicker: "01 · Try it",
+            id: "tryData", title: "Try It: Turn Data Into Influence", kicker: "Try it",
             blocks: [
               { t: "callout", kind: "scenario", title: "Transform this statement for {boss}", html: V({
                 tl_ops: "<span class='big-quote'>“Our team's AR backlog increased by 20% this month.”</span>",
@@ -245,7 +247,7 @@
             ]
           },
           {
-            id: "hunt1", title: "Spot the Leader Moves", kicker: "01 · Activity",
+            id: "hunt1", title: "Spot the Leader Moves", kicker: "Activity",
             blocks: [
               { t: "p", html: "Here's an update posted to {boss} in Teams. Read it once, then find each move by clicking the sentence." },
               { t: "activity", a: {
@@ -309,28 +311,37 @@
                   "Notice the order: purpose → fact → why → impact → action → ask. You'll see this pattern again as SBAR."
                 ]
               }},
-              { t: "reflect", id: "r_hunt", optional: true, title: "Quick reflection (optional)",
+              { t: "reflect", id: "r_hunt", title: "Quick reflection",
                 fields: [{ id: "hunt", label: "What would you change in the last update you sent {boss}?", rows: 2 }] }
             ]
           },
           {
-            id: "q1", title: "Check for Understanding", kicker: "01 · Quiz",
+            id: "q1", title: "Check for Understanding", kicker: "Quiz",
             blocks: [
               { t: "quiz", id: "q_m1", questions: [
                 V({
                   ops: { q: "{Boss} asks, “How's the backlog?” Which answer moves from Information to Influence?",
-                    o: ["“It's at 1,240 accounts.”", "“It's up 12% because callers are out.”", "“It's up 12% because callers are out. I've moved the oldest accounts to senior callers, and we'll be back on target by Friday.”", "“Honestly, it's been a tough week.”"],
-                    a: 2, why: "Only this answer adds meaning and a path forward — cause, ownership and a timeline. The first is Information; the second reaches Insight." },
+                    o: ["“It's up 12% since Monday because two callers are out, mostly on Aetna accounts over 60 days.”",
+                        "“It's up 12%. I've moved the oldest Aetna accounts to senior callers; we're back on target Friday.”",
+                        "“It's at 1,240 accounts — up 12% on last week — and 310 of them are now older than 60 days.”",
+                        "“It's up 12% and the team is stretched, but everyone's pushing hard and we'll catch up soon.”"],
+                    a: 1, why: "Only this one says what's being done and by when. The first adds the cause (Insight), the third adds detail (still Information), and the fourth offers reassurance with no plan." },
                   nonops: { q: "{Boss} asks, “How's the ticket queue?” Which answer moves from Information to Influence?",
-                    o: ["“It's at 214 tickets.”", "“It's up 30% because of the VPN change.”", "“It's up 30% because of the VPN change. We've published a self-fix guide and will be back within SLA by Friday.”", "“Honestly, it's been a tough week.”"],
-                    a: 2, why: "Only this answer adds meaning and a path forward — cause, ownership and a timeline. The first is Information; the second reaches Insight." }
+                    o: ["“It's up 30% since the VPN change on Monday — most tickets are re-authentication failures.”",
+                        "“It's up 30% from the VPN change. We've published a self-fix guide; back within SLA by Friday.”",
+                        "“It's at 214 open tickets — up 30% on last week — and 48 are now past the two-day SLA.”",
+                        "“It's up 30% and the team is stretched, but everyone's pushing hard and we'll catch up soon.”"],
+                    a: 1, why: "Only this one says what's being done and by when. The first adds the cause (Insight), the third adds detail (still Information), and the fourth offers reassurance with no plan." }
                 }),
                 { q: "Which step of the Master Message Model do people most often skip when they jump straight to action?",
                   o: ["What?", "So what?", "Now what?", "What do you need?"],
                   a: 1, why: "“So what?” is the most-skipped step. Without it, the listener can't judge how urgent or important your issue is." },
                 { q: "Why is “Productivity is 8% below target” stronger than “The team is struggling”?",
-                  o: ["It uses more senior vocabulary", "It's specific and quantified, so the listener can gauge the size of the problem", "It's longer and more detailed", "It avoids blaming anyone"],
-                  a: 1, why: "Sounding senior is about precision, not vocabulary. A number lets the listener judge scale and urgency." }
+                  o: ["It sounds more senior, so the listener is more likely to take the issue seriously",
+                      "It's specific and measurable, so the listener can judge how big the problem is",
+                      "It removes emotion, so nobody on the team feels personally criticised by it",
+                      "It points to the cause, so the listener knows which problem to fix first"],
+                  a: 1, why: "It doesn't state a cause and it isn't about sounding senior. A number lets the listener judge scale and urgency — that's what makes it stronger." }
               ]}
             ]
           }
@@ -339,10 +350,10 @@
 
       /* ================================================================== */
       {
-        id: "m2", num: "02", title: "Structure: SBAR for High-Stakes Updates", minutes: 12,
+        id: "m2", num: "2", title: "Structure: SBAR for High-Stakes Updates", minutes: 12,
         steps: [
           {
-            id: "sbar", title: "The SBAR Framework", kicker: "02 · Structure",
+            id: "sbar", title: "The SBAR Framework", kicker: "Structure",
             blocks: [
               { t: "p", html: "SBAR prevents the classic problem of giving five minutes of background before saying why you called." },
               { t: "cards", cols: 4, items: [
@@ -383,7 +394,7 @@
             ]
           },
           {
-            id: "seq1", title: "Put the SBAR in Order", kicker: "02 · Activity",
+            id: "seq1", title: "Put the SBAR in Order", kicker: "Activity",
             blocks: [
               { t: "callout", kind: "scenario", title: "Scenario", html: V({
                 tl_ops: "Three callers are out sick and a timely-filing deadline is coming. Your update to your manager has been scrambled.",
@@ -432,7 +443,7 @@
             ]
           },
           {
-            id: "notdo", title: "What Not To Do", kicker: "02 · Structure",
+            id: "notdo", title: "What Not To Do", kicker: "Structure",
             blocks: [
               { t: "p", html: "“Reporter” communication leaves the listener to do the thinking. Read the four lines below and ask yourself: <strong>what's missing?</strong>" },
               { t: "warnlist", items: V({
@@ -443,7 +454,7 @@
             ]
           },
           {
-            id: "trySbar", title: "Try It: Build Your Own SBAR", kicker: "02 · Try it",
+            id: "trySbar", title: "Try It: Build Your Own SBAR", kicker: "Try it",
             blocks: [
               { t: "callout", kind: "scenario", title: "Scenario", html: V({
                 tl_ops: "A key client has escalated a recurring quality issue on your team's work.<ul><li>Your team's quality score dropped from 97% to 91%</li><li>The client has asked for an action plan</li><li>Your senior processor believes it's temporary</li><li>QA sees the same modifier error recurring for three weeks</li><li>Your manager meets the client tomorrow and wants your briefing today</li></ul>",
@@ -469,27 +480,39 @@
             ]
           },
           {
-            id: "q2", title: "Check for Understanding", kicker: "02 · Quiz",
+            id: "q2", title: "Check for Understanding", kicker: "Quiz",
             blocks: [
               { t: "quiz", id: "q_m2", questions: [
                 { q: "In SBAR, which part shows your judgement?",
                   o: ["Situation", "Background", "Assessment", "Recommendation"], a: 2,
-                  why: "Assessment is where you interpret the facts — what they mean for the business. That's your judgement on display." },
+                  why: "Assessment is where you interpret the facts — what they mean for the business. Recommendation builds on that judgement, but the judgement itself lives in Assessment." },
                 V({
                   ops: { q: "Someone spends the first two minutes of an update explaining the history of a payer's policy. What's going wrong?",
-                    o: ["Nothing — context always helps", "They're leading with Background instead of the Situation; background should be relevant, not everything they know", "They should have led with the Recommendation", "They should have sent it by email instead"], a: 1,
-                    why: "SBAR starts with the Situation so the listener knows why you're talking. Background is only what's needed to understand it." },
+                    o: ["Nothing serious — history builds credibility, provided the recommendation still comes clearly at the end",
+                        "They've opened with Background; the Situation should come first, with only the context that matters",
+                        "They've skipped the Assessment, so the history isn't connected to any business impact yet",
+                        "They should have opened with the Recommendation, because senior leaders only want the decision"], a: 1,
+                    why: "SBAR starts with the Situation so the listener knows why you're talking. Background is only what's needed to understand it — not everything you know." },
                   nonops: { q: "Someone spends the first two minutes of an update explaining the history of the payroll system migration. What's going wrong?",
-                    o: ["Nothing — context always helps", "They're leading with Background instead of the Situation; background should be relevant, not everything they know", "They should have led with the Recommendation", "They should have sent it by email instead"], a: 1,
-                    why: "SBAR starts with the Situation so the listener knows why you're talking. Background is only what's needed to understand it." }
+                    o: ["Nothing serious — history builds credibility, provided the recommendation still comes clearly at the end",
+                        "They've opened with Background; the Situation should come first, with only the context that matters",
+                        "They've skipped the Assessment, so the history isn't connected to any business impact yet",
+                        "They should have opened with the Recommendation, because senior leaders only want the decision"], a: 1,
+                    why: "SBAR starts with the Situation so the listener knows why you're talking. Background is only what's needed to understand it — not everything you know." }
                 }),
                 V({
                   ops: { q: "Which Recommendation is strongest?",
-                    o: ["“We should probably look into it.”", "“Maybe we could add some overtime?”", "“Resubmit the 62 affected claims by Thursday — I need approval for 4 hours of OT today.”", "“Let's discuss options at next week's meeting.”"], a: 2,
-                    why: "A strong recommendation has a specific action, a timeline and a clear ask." },
+                    o: ["“We should look at overtime this week so the affected claims are resubmitted in time.”",
+                        "“Resubmit the 62 affected claims by Thursday — I need 4 hours of OT approved today.”",
+                        "“I recommend the team prioritises the 62 affected claims, and I'll keep you posted.”",
+                        "“Let's review the 62 affected claims together on Monday and agree next steps then.”"], a: 1,
+                    why: "Only this one has a specific action, a deadline and a clear ask. The others hedge (“should look at”), leave out the ask, or push the decision to next week." },
                   nonops: { q: "Which Recommendation is strongest?",
-                    o: ["“We should probably look into it.”", "“Maybe we could try a referral bonus?”", "“Launch a referral bonus for this batch Monday — I need your approval today.”", "“Let's discuss options at next week's meeting.”"], a: 2,
-                    why: "A strong recommendation has a specific action, a timeline and a clear ask." }
+                    o: ["“We should look at a referral bonus this week to help fill the four open start dates.”",
+                        "“Launch a referral bonus for this batch on Monday — I need your approval today.”",
+                        "“I recommend we keep pushing the agencies on the four open seats, and I'll keep you posted.”",
+                        "“Let's review the referral idea together at next week's meeting and agree next steps.”"], a: 1,
+                    why: "Only this one has a specific action, a deadline and a clear ask. The others hedge (“should look at”), leave out the ask, or push the decision to next week." }
                 })
               ]}
             ]
@@ -499,10 +522,10 @@
 
       /* ================================================================== */
       {
-        id: "m3", num: "03", title: "Adapt: Same Facts, Different Lens", minutes: 9,
+        id: "m3", num: "3", title: "Adapt: Same Facts, Different Lens", minutes: 9,
         steps: [
           {
-            id: "lens", title: "Same Message ≠ Same Communication", kicker: "03 · Adapt",
+            id: "lens", title: "Same Message ≠ Same Communication", kicker: "Adapt",
             blocks: [
               { t: "p", html: "The facts stay the same across audiences. Only the <strong>emphasis</strong> changes — based on what that person needs to know or decide." },
               { t: "cards", cols: 4, numbered: true, items: V({
@@ -536,7 +559,7 @@
             ]
           },
           {
-            id: "match1", title: "Match the Opening to the Audience", kicker: "03 · Activity",
+            id: "match1", title: "Match the Opening to the Audience", kicker: "Activity",
             blocks: [
               { t: "callout", kind: "scenario", title: "One fact", html: V({
                 tl_ops: "Your team's AR backlog is up 20%. Here are four openings — one written for each audience.",
@@ -583,7 +606,7 @@
             ]
           },
           {
-            id: "tryAdapt", title: "Try It: One Problem, Four Openings", kicker: "03 · Try it",
+            id: "tryAdapt", title: "Try It: One Problem, Four Openings", kicker: "Try it",
             blocks: [
               { t: "callout", kind: "scenario", title: "New fact", html: J(V({
                 tl_ops: "<span class='big-quote'>“Our clean-claim rate dropped from 95% to 89% this week.”</span>",
@@ -628,19 +651,28 @@
             ]
           },
           {
-            id: "q3", title: "Check for Understanding", kicker: "03 · Quiz",
+            id: "q3", title: "Check for Understanding", kicker: "Quiz",
             blocks: [
               { t: "quiz", id: "q_m3", questions: [
                 { q: "What does stakeholder translation mean?",
-                  o: ["Changing the facts to suit each audience", "Keeping the same facts but changing the emphasis to fit what each person needs to know or decide", "Giving everyone the full detail so nobody is left out", "Only sharing good news with clients"], a: 1,
-                  why: "Same facts — different lens, not a different truth." },
+                  o: ["Choosing which facts to share so each audience only hears what's relevant to their role",
+                      "Keeping the facts identical but changing the emphasis to what each person must decide",
+                      "Giving every audience the same full briefing, so nobody can say they weren't told",
+                      "Using each audience's own terminology, so the message feels familiar to them"], a: 1,
+                  why: "The facts stay the same for everyone — you change the emphasis, not which facts people get. Leaving facts out for some audiences becomes spin." },
                 V({
                   tl: { q: "You're telling your team about the problem. What should you lead with?",
-                    o: ["The dollar value at risk", "What we're doing and what I need from you", "How it compares to other teams", "The history of how it built up"], a: 1,
-                    why: "Your team needs action and clarity — what to do differently today." },
+                    o: ["The dollar value at risk, so they understand why it matters",
+                        "What we're doing differently today and what I need from them",
+                        "How our numbers compare with the other teams on the floor",
+                        "How the problem built up, so they have the full context"], a: 1,
+                    why: "Your team needs action and clarity — what to do differently today. The money matters, but it's the lead for your manager, not your team." },
                   mgr: { q: "You're briefing the CFO or COO. What should you lead with?",
-                    o: ["Which Team Leader is responsible", "The financial impact and the risk", "A detailed timeline of events", "How hard the teams are working"], a: 1,
-                    why: "Senior finance and operations leaders need the number and the implication first." }
+                    o: ["The recovery plan your Team Leaders are already running",
+                        "The financial impact and the risk if it isn't recovered",
+                        "A clear timeline, so they can see exactly how it happened",
+                        "Which team it started in, so accountability is clear"], a: 1,
+                    why: "Senior finance and operations leaders need the number and the implication first. The plan comes next — it answers the question the number raises." }
                 })
               ]}
             ]
@@ -650,10 +682,10 @@
 
       /* ================================================================== */
       {
-        id: "m4", num: "04", title: "Executive Presence", minutes: 9,
+        id: "m4", num: "4", title: "Executive Presence", minutes: 9,
         steps: [
           {
-            id: "fivec", title: "The Five C's of Executive Presence", kicker: "04 · Presence",
+            id: "fivec", title: "The Five C's of Executive Presence", kicker: "Presence",
             blocks: [
               { t: "lead", html: "Executive presence is not about sounding important. It's about being <strong>credible and useful</strong> — and it's made of observable, learnable behaviours, not charisma." },
               { t: "activity", a: {
@@ -676,7 +708,7 @@
             ]
           },
           {
-            id: "detox", title: "Language Detox: Make the Ask Obvious", kicker: "04 · Activity",
+            id: "detox", title: "Language Detox: Make the Ask Obvious", kicker: "Activity",
             blocks: [
               { t: "p", html: "Your email and chat messages are part of your leadership presence — often where your reputation is actually set. Four standards: <strong>Precision</strong> (say exactly what you mean), <strong>Brevity</strong> (cut unnecessary words), <strong>Action</strong> (make the required action obvious), <strong>Confidence</strong> (avoid unnecessary hedging)." },
               { t: "activity", a: {
@@ -720,7 +752,7 @@
             ]
           },
           {
-            id: "tryDetox", title: "Try It: Rewrite the Message", kicker: "04 · Try it",
+            id: "tryDetox", title: "Try It: Rewrite the Message", kicker: "Try it",
             blocks: [
               { t: "callout", kind: "scenario", title: "Rewrite this", html: V({
                 ops: "<span class='big-quote'>“I just wanted to check if maybe we could have a quick discussion sometime this week regarding the client issue.”</span>",
@@ -736,7 +768,7 @@
             ]
           },
           {
-            id: "dontknow", title: "When You Don't Know the Answer", kicker: "04 · Presence",
+            id: "dontknow", title: "When You Don't Know the Answer", kicker: "Presence",
             blocks: [
               { t: "cards", cols: 3, items: [
                 { title: "Don't guess", text: "Avoid speculating just to sound confident.<br><em>“I think it's probably around…”</em>", tone: "bad" },
@@ -747,23 +779,32 @@
             ]
           },
           {
-            id: "q4", title: "Check for Understanding", kicker: "04 · Quiz",
+            id: "q4", title: "Check for Understanding", kicker: "Quiz",
             blocks: [
               { t: "quiz", id: "q_m4", questions: [
                 V({
                   ops: { q: "{Boss} asks for the exact write-off figure. You don't have it. What's the best response?",
-                    o: ["“I think it's probably around $20K.”", "“Sorry, I'm not sure — I'll check at some point.”", "“I don't have that number with me. What I can confirm is about 40 accounts are affected. I'll validate the figure and come back by 3 PM.”", "“That's really a question for billing.”"], a: 2,
-                    why: "Be transparent, share what you can confirm, and own a time-boxed follow-up." },
+                    o: ["“I think it's roughly $20K — I'll double-check and confirm the exact figure later today.”",
+                        "“I don't have it to hand. About 40 accounts are affected — I'll confirm the figure by 3 PM.”",
+                        "“Billing owns that number, so it's best to check with them directly for the exact figure.”",
+                        "“I'm not certain yet — there are a few moving parts, so let me look into it and come back.”"], a: 1,
+                    why: "Be transparent, share what you can confirm, and own a time-boxed follow-up. Guessing — even with a promise to check — anchors them on a number that may be wrong." },
                   nonops: { q: "{Boss} asks for the exact cost-per-hire this quarter. You don't have it. What's the best response?",
-                    o: ["“I think it's probably around $2,000.”", "“Sorry, I'm not sure — I'll check at some point.”", "“I don't have that number with me. What I can confirm is agency spend is up this quarter. I'll validate the figure and come back by 3 PM.”", "“That's really a question for Finance.”"], a: 2,
-                    why: "Be transparent, share what you can confirm, and own a time-boxed follow-up." }
+                    o: ["“I think it's roughly $2,000 — I'll double-check and confirm the exact figure later today.”",
+                        "“I don't have it to hand. Agency spend is up this quarter — I'll confirm the figure by 3 PM.”",
+                        "“Finance owns that number, so it's best to check with them directly for the exact figure.”",
+                        "“I'm not certain yet — there are a few moving parts, so let me look into it and come back.”"], a: 1,
+                    why: "Be transparent, share what you can confirm, and own a time-boxed follow-up. Guessing — even with a promise to check — anchors them on a number that may be wrong." }
                 }),
                 { q: "Which email opening shows the most executive presence?",
-                  o: ["“Sorry to bother you, I just wanted to ask about…”", "“I'd like your approval for the request below by Wednesday 12 PM.”", "“Hopefully it's OK if we maybe go ahead?”", "“Please let me know your thoughts.”"], a: 1,
-                  why: "It states the purpose, the ask and the deadline — no hedging." },
+                  o: ["“Sorry to bother you — could you approve the request below when you get a chance?”",
+                      "“I'd like your approval for the request below by Wednesday 12 PM.”",
+                      "“Just checking whether you've had a chance to look at the request I sent over?”",
+                      "“Please let me know your thoughts on the request below — happy to discuss.”"], a: 1,
+                  why: "It states the purpose, the ask and a deadline — no apology, no hedging. The others are polite but leave the reader to work out what you need and by when." },
                 { q: "In the Five C's, what does “Concise” mean?",
-                  o: ["Always under three sentences", "Leaving out anything negative", "Prioritised — not incomplete", "Speaking quickly"], a: 2,
-                  why: "Concise means you've done the work of prioritising what matters to the decision." }
+                  o: ["Keeping every update under three sentences", "Prioritising what matters to the decision", "Leaving out bad news unless someone asks", "Speaking quickly to respect people's time"], a: 1,
+                  why: "Concise means prioritised, not short for its own sake — you've done the work of deciding what matters to the decision." }
               ]}
             ]
           }
@@ -772,10 +813,10 @@
 
       /* ================================================================== */
       {
-        id: "m5", num: "05", title: "Navigate: Difficult Conversations with COIN", minutes: 14,
+        id: "m5", num: "5", title: "Navigate: Difficult Conversations with COIN", minutes: 14,
         steps: [
           {
-            id: "coin", title: "The COIN Model", kicker: "05 · Navigate",
+            id: "coin", title: "The COIN Model", kicker: "Navigate",
             blocks: [
               { t: "p", html: J(V({
                 tl: "Every Team Leader has these conversations: performance concerns, missed commitments, quality slips, pushback, peer conflict, repeated communication gaps.",
@@ -819,7 +860,7 @@
             ]
           },
           {
-            id: "behav", title: "Behaviour, Not Personality", kicker: "05 · Activity",
+            id: "behav", title: "Behaviour, Not Personality", kicker: "Activity",
             blocks: [
               { t: "p", html: "A COIN Observation describes <strong>specific behaviour</strong> — something you could have seen or measured. Labels about personality invite argument." },
               { t: "activity", a: {
@@ -867,7 +908,7 @@
             ]
           },
           {
-            id: "sim", title: "Simulation: A Difficult Conversation", kicker: "05 · Simulation",
+            id: "sim", title: "Simulation: A Difficult Conversation", kicker: "Simulation",
             blocks: [
               { t: "p", html: "This replaces the live role-play. You'll run a COIN conversation one decision at a time. Pick what you'd say — if it misses, you'll get coaching and another try." },
               { t: "activity", a: V({
@@ -876,25 +917,25 @@
                   setup: "Sam is an experienced AR caller on your team. For the third week in a row, Sam hasn't finished the payer follow-ups they committed to. Two claims have now passed timely filing. You've booked 15 minutes in a quiet room.",
                   steps: [
                     { label: "Context", situation: "Sam sits down. How do you open?", options: [
-                      { text: "“Hey Sam, got a minute? Nothing serious, just a quick thing…”", ok: false, fb: "Softening hides the purpose. Sam now has to guess what this is about — and if it turns out to be serious, you've undermined your own message." },
-                      { text: "“Sam, I want to talk about the payer follow-ups that were due Monday.”", ok: true, fb: "Clear context. Sam knows exactly what conversation this is, without any judgement attached yet." },
-                      { text: "“Sam, we need to talk about your attitude to deadlines.”", ok: false, fb: "That's a personality label. You've put Sam on the defensive in the first sentence." } ] },
+                      { text: "“Sam, thanks for coming in — how are things going with your workload this week?”", ok: false, fb: "A warm check-in feels kind, but it hides the purpose. Sam has to guess why they're here, and when the real topic arrives it feels like an ambush." },
+                      { text: "“Sam, I want to talk about the payer follow-ups that were due on Monday.”", ok: true, fb: "Clear context. Sam knows exactly what this conversation is about, with no judgement attached yet." },
+                      { text: "“Sam, I want to talk about your reliability with follow-ups lately.”", ok: false, fb: "Close — but “your reliability” is a judgement about Sam, not a topic. It puts them on the defensive before you've shared a single fact." } ] },
                     { label: "Observation", situation: "Sam nods: “OK…” What did you observe?", options: [
-                      { text: "“You never get your follow-ups done.”", ok: false, fb: "“Never” is an exaggeration Sam can easily disprove — and then you're arguing about the word, not the pattern." },
-                      { text: "“Some people on the team have noticed you're falling behind.”", ok: false, fb: "That's hearsay and it drags the team in. Speak to what <em>you</em> observed, specifically." },
-                      { text: "“Twelve of the fifteen accounts on your list weren't worked by Monday, and it's the third week this has happened.”", ok: true, fb: "Specific, measurable, and it names the pattern without exaggerating it." } ] },
+                      { text: "“Your follow-ups keep slipping, and it's turning into a bit of a pattern lately.”", ok: false, fb: "It names a pattern but gives nothing specific — which accounts, how many, since when? Sam can easily say “that's not true”." },
+                      { text: "“A couple of people mentioned your list wasn't finished again this week.”", ok: false, fb: "That's second-hand, and it drags the team in. Use what you saw in the data yourself." },
+                      { text: "“Twelve of your fifteen accounts weren't worked by Monday — the third week running.”", ok: true, fb: "Specific, measurable, first-hand — and it names the pattern without exaggerating." } ] },
                     { label: "Impact", situation: "Sam is quiet. What was the impact?", options: [
-                      { text: "“It makes me look bad in front of my manager.”", ok: false, fb: "That makes it about you. Impact should be the business, client or team consequence." },
-                      { text: "“Two of those claims have now passed timely filing — that's $4,800 we can't recover — and Jo and Ravi picked up the rework.”", ok: true, fb: "Concrete business impact and team impact. This is what makes the conversation matter." },
-                      { text: "“It's just not acceptable.”", ok: false, fb: "That's a judgement, not an impact. Sam still doesn't know what the consequence actually was." } ] },
+                      { text: "“My manager asked me about it this morning, so it's now firmly on their radar too.”", ok: false, fb: "That makes the impact about you and your visibility. What was the business, client or team consequence?" },
+                      { text: "“Two claims passed timely filing — $4,800 we can't recover — and Jo picked up the rest.”", ok: true, fb: "Concrete business and team impact. This is what makes the conversation matter." },
+                      { text: "“It puts the team's monthly numbers at risk, and we honestly can't keep letting that happen.”", ok: false, fb: "It points at a consequence, but a vague one. “At risk” invites debate — the specific loss doesn't." } ] },
                     { label: "Pushback", situation: "Sam pushes back: <em>“I was dealing with a lot of eligibility escalations — it wasn't entirely my fault.”</em>", options: [
-                      { text: "“That's not really the point.”", ok: false, fb: "Dismissive and defensive. Sam feels unheard, and the conversation turns into a standoff." },
-                      { text: "“OK, fair enough — let's leave it this time.”", ok: false, fb: "You've dropped accountability. It's the third week — the pattern will continue, and the rest of the team will notice." },
-                      { text: "“I hear you — the escalations were real, and I should have spotted that load sooner. The follow-ups still need to happen, so let's work out how.”", ok: true, fb: "You acknowledge what's true, own your part, and keep the conversation on the next step." } ] },
+                      { text: "“I get that it's been busy, but everyone's busy right now — the follow-ups still had to get done.”", ok: false, fb: "You hold the standard, but you dismiss something real. Sam feels unheard, and the conversation turns into a standoff." },
+                      { text: "“That's fair — the escalations were heavy, so let's put this one behind us.”", ok: false, fb: "Empathetic, but you've dropped accountability in the third week of the pattern. It will continue, and the team will notice." },
+                      { text: "“The escalations were real and I missed that load. The follow-ups still matter — let's plan.”", ok: true, fb: "You acknowledge what's true, own your part, and keep the conversation moving to the next step." } ] },
                     { label: "Next step", situation: "Sam relaxes a little: “Yeah… OK.” How do you close?", options: [
-                      { text: "“Let's do a 10-minute check-in at 4 PM each day on your follow-up list for two weeks, and I'll route new escalations to Jo until Friday. Does that work for you?”", ok: true, fb: "Specific, time-boxed, supportive — and it checks for agreement. That's a real next step." },
-                      { text: "“Just try harder next week.”", ok: false, fb: "Vague. Nothing will be different next week, and there's nothing to follow up on." },
-                      { text: "“If it happens again, I'll have to take this to HR.”", ok: false, fb: "Leading with a threat isn't a next step. First agree what needs to change and how you'll support it." } ] }
+                      { text: "“Let's do a 10-minute 4 PM check-in daily for two weeks, and I'll route escalations to Jo. OK?”", ok: true, fb: "Specific, time-boxed, supportive — and it checks for agreement. That's a real next step." },
+                      { text: "“Please make follow-ups your first priority each day, and tell me if anything blocks you.”", ok: false, fb: "Supportive, but vague: no timeframe, no check-in, nothing either of you can follow up on." },
+                      { text: "“I'll check your list daily, and if it slips again we'll move to a formal performance plan.”", ok: false, fb: "It's specific, but one-sided and it leads with a threat. Agree the change and your support first." } ] }
                   ]
                 },
                 mgr_ops: {
@@ -902,25 +943,25 @@
                   setup: "Sam is one of your Team Leaders. For the third time this month, Sam's client update went out without the corrective action plan you'd agreed — and yesterday the client asked about it directly on a call with your director. You've booked 20 minutes.",
                   steps: [
                     { label: "Context", situation: "Sam joins the call. How do you open?", options: [
-                      { text: "“Sam, got a sec? Just a small thing about the client…”", ok: false, fb: "Softening it signals it doesn't matter — the opposite of what you need Sam to hear." },
-                      { text: "“Sam, I'm worried about your client skills.”", ok: false, fb: "That's a judgement about Sam, not a conversation topic. Sam will defend themselves instead of listening." },
-                      { text: "“Sam, I want to talk about Tuesday's client update.”", ok: true, fb: "Clear, neutral context. Sam knows exactly what this is about." } ] },
+                      { text: "“Sam, thanks for joining — how do you think the client relationship is going?”", ok: false, fb: "An open question feels coaching-friendly, but it hides why you're meeting. Sam has to guess, and the real topic lands as a surprise." },
+                      { text: "“Sam, I want to talk about how you've been handling the client lately.”", ok: false, fb: "It sounds like a topic, but “how you've been handling” is a judgement. Sam will defend their overall performance instead of looking at one update." },
+                      { text: "“Sam, I want to talk about Tuesday's client update and what was in it.”", ok: true, fb: "Clear, neutral and specific. Sam knows exactly what this is about." } ] },
                     { label: "Observation", situation: "Sam: “Sure — what about it?”", options: [
-                      { text: "“The corrective action plan wasn't included on Tuesday, and it's the third update this month without it.”", ok: true, fb: "Specific and factual, and it names the pattern." },
-                      { text: "“You always leave important things out of client updates.”", ok: false, fb: "“Always” is an exaggeration — Sam will point to the times it was fine." },
-                      { text: "“The client thinks you're disorganised.”", ok: false, fb: "That's a label, second-hand. Stick to what you observed." } ] },
+                      { text: "“Tuesday's update had no corrective action plan — the third update this month without it.”", ok: true, fb: "Specific and factual, and it names the pattern." },
+                      { text: "“Your client updates have been missing key information for a while now.”", ok: false, fb: "Which information? Since when? Too general to act on — and easy to dispute." },
+                      { text: "“The client feels your updates are disorganised and don't really answer the questions they ask.”", ok: false, fb: "It's second-hand and it's a label. Stick to what you observed in the update itself." } ] },
                     { label: "Impact", situation: "Sam goes quiet. What was the impact?", options: [
-                      { text: "“It embarrassed me in front of the director.”", ok: false, fb: "That makes it about your discomfort rather than the business consequence." },
-                      { text: "“It's really unprofessional.”", ok: false, fb: "A judgement, not an impact. What actually happened as a result?" },
-                      { text: "“The client asked about it directly, which created a confidence gap and a follow-up to our director — on an account that renews in Q3.”", ok: true, fb: "Client impact, leadership visibility and commercial risk — clear and factual." } ] },
+                      { text: "“The director raised it with me directly afterwards, which put me in a really difficult spot.”", ok: false, fb: "True, but it centres your discomfort. What did it cost the client relationship or the business?" },
+                      { text: "“It doesn't reflect the standard we agreed for client communication.”", ok: false, fb: "That restates the gap as a judgement. Sam still doesn't know what actually happened as a result." },
+                      { text: "“The client asked for it on a call with our director — on an account renewing in Q3.”", ok: true, fb: "Client impact, leadership visibility and commercial risk — clear and factual." } ] },
                     { label: "Pushback", situation: "Sam pushes back: <em>“The issues were changing daily — I didn't want to commit to a plan that might change.”</em>", options: [
-                      { text: "“That's just an excuse.”", ok: false, fb: "Dismissive. Sam has a real point about uncertainty — ignoring it loses them." },
-                      { text: "“I understand — the plan was moving. The client still needs to see we're in control, so let's show the plan and say what might change.”", ok: true, fb: "You acknowledge the real constraint and still hold the standard. That's composed leadership." },
-                      { text: "“Fine — skip the plan until things settle.”", ok: false, fb: "You've lowered the standard the client expects. The confidence gap will grow." } ] },
+                      { text: "“I understand, but the client expects a plan, so it has to be in there regardless.”", ok: false, fb: "Right standard, wrong delivery. You skip Sam's real concern, so they'll comply without understanding how to handle uncertainty next time." },
+                      { text: "“That's a fair concern. Share the plan and flag what could change — that shows control.”", ok: true, fb: "You acknowledge the real constraint and show how to meet the standard anyway. That's composed coaching." },
+                      { text: "“That makes sense — let's hold the plan back until things are more stable.”", ok: false, fb: "It sounds reasonable, but you've lowered the standard the client asked for. The confidence gap will grow." } ] },
                     { label: "Next step", situation: "Sam: “OK… so what do you want me to do differently?”", options: [
-                      { text: "“Be more careful with the client.”", ok: false, fb: "Too vague to act on or follow up." },
-                      { text: "“Next time, I'll take over the account.”", ok: false, fb: "A threat, not a next step — and it removes Sam's chance to grow." },
-                      { text: "“Let's do a 10-minute pre-call review before every client call this month — you bring the draft, I'll help sharpen the narrative. Does that work?”", ok: true, fb: "Specific, time-boxed, supportive, and it checks agreement." } ] }
+                      { text: "“Please make sure every single client update includes the plan from now on, with no exceptions.”", ok: false, fb: "Clear expectation, but no support and no way to check it's working." },
+                      { text: "“Let's do a 10-minute pre-call review before each client call this month. Does that work?”", ok: true, fb: "Specific, time-boxed, supportive, and it checks for agreement." },
+                      { text: "“I'll join your next few client calls myself to make sure everything's covered.”", ok: false, fb: "Supportive on the surface, but you've taken the work over. Sam doesn't build the skill, and the client learns to go around them." } ] }
                   ]
                 },
                 tl_nonops: {
@@ -928,25 +969,25 @@
                   setup: "Sam is a recruiter on your Talent Acquisition team. For the third week running, candidates in Sam's pipeline have gone over a week with no update. Two have accepted offers elsewhere, and an Ops manager has escalated to your manager. You've booked 15 minutes.",
                   steps: [
                     { label: "Context", situation: "Sam sits down. How do you open?", options: [
-                      { text: "“Sam, we need to talk about how disorganised you've been.”", ok: false, fb: "A personality label in your first sentence — Sam goes on the defensive." },
-                      { text: "“Sam, I want to talk about candidate updates to the Ops hiring managers.”", ok: true, fb: "Clear context, no judgement attached." },
-                      { text: "“Sam, quick chat? It's nothing really…”", ok: false, fb: "If it's nothing, why are you meeting? Softening hides the purpose." } ] },
+                      { text: "“Sam, I want to talk about candidate updates to the Ops hiring managers.”", ok: true, fb: "Clear context with no judgement attached." },
+                      { text: "“Sam, thanks for coming in — how are you finding the hiring workload lately?”", ok: false, fb: "A kind check-in, but it hides the purpose. Sam has to guess why they're here." },
+                      { text: "“Sam, I want to talk about how organised you've been with candidates lately.”", ok: false, fb: "“How organised you've been” is a judgement about Sam. Expect defensiveness before you've shared a fact." } ] },
                     { label: "Observation", situation: "Sam: “OK…” What did you observe?", options: [
-                      { text: "“You never update anyone.”", ok: false, fb: "“Never” is easy to disprove — then you're arguing about the word." },
-                      { text: "“The Ops managers say you ignore them.”", ok: false, fb: "Hearsay. Speak to what you observed in the data." },
-                      { text: "“Six of the ten candidates in your pipeline had no update for over a week, and it's the third week running.”", ok: true, fb: "Specific, measurable and it names the pattern." } ] },
+                      { text: "“Candidates in your pipeline keep going quiet, and it's becoming a pattern.”", ok: false, fb: "Names a pattern but nothing specific — how many, how long? Easy to dispute." },
+                      { text: "“A couple of Ops managers told me they never hear back from you about their candidates.”", ok: false, fb: "Second-hand, and “never” is an exaggeration. Use what you saw in the pipeline data." },
+                      { text: "“Six of your ten candidates had no update for over a week — the third week running.”", ok: true, fb: "Specific, measurable, first-hand, and it names the pattern." } ] },
                     { label: "Impact", situation: "Sam looks surprised. What was the impact?", options: [
-                      { text: "“Two candidates accepted other offers, the floor is still two seats short, and the Ops manager escalated to my manager.”", ok: true, fb: "Candidate, Ops and team impact — concrete and business-focused." },
-                      { text: "“It makes me look bad to my manager.”", ok: false, fb: "That centres you. Impact should be the business or internal-client consequence." },
-                      { text: "“That's just not good enough.”", ok: false, fb: "A judgement, not a consequence." } ] },
+                      { text: "“Two candidates took other offers, the floor is two seats short, and Ops escalated.”", ok: true, fb: "Candidate, Ops and business impact — concrete and specific." },
+                      { text: "“My manager heard about it from Ops, so it's now on their radar as well.”", ok: false, fb: "That centres your visibility. What did it cost the Ops floor?" },
+                      { text: "“It makes our whole team look slow to Ops, and we really can't keep letting that happen.”", ok: false, fb: "Reputation matters, but it's vague. The lost candidates and empty seats are the real impact." } ] },
                     { label: "Pushback", situation: "Sam pushes back: <em>“Hiring managers take days to give feedback — I can't update candidates on nothing.”</em>", options: [
-                      { text: "“That's not the point.”", ok: false, fb: "It partly <em>is</em> the point — dismissing it loses Sam." },
-                      { text: "“That's fair — slow feedback is real, and I'll raise it with the Ops managers. Candidates still need to hear from us, even if it's ‘no news yet’, so let's plan that.”", ok: true, fb: "You acknowledge the real blocker, take ownership of your part, and keep the standard." },
-                      { text: "“Then don't worry about it until they reply.”", ok: false, fb: "You've dropped the standard — more candidates will walk." } ] },
+                      { text: "“I get it, but candidates still need regular updates from us, so it has to happen regardless.”", ok: false, fb: "Right standard, but you've skipped a real blocker. Sam feels unheard." },
+                      { text: "“Slow feedback is real — I'll raise it with Ops. Candidates still need a ‘no news yet’.”", ok: true, fb: "You acknowledge the blocker, take ownership of your part, and keep the standard." },
+                      { text: "“That's fair — let's hold candidate updates until the hiring managers come back to you.”", ok: false, fb: "It sounds reasonable, but more candidates will walk while they wait in silence." } ] },
                     { label: "Next step", situation: "Sam: “OK. What do you need from me?”", options: [
-                      { text: "“If another candidate drops, it goes on your review.”", ok: false, fb: "A threat isn't a next step. Agree the change first." },
-                      { text: "“Try to stay on top of it.”", ok: false, fb: "Vague — nothing to act on or check." },
-                      { text: "“Let's agree updates every Tuesday and Friday by noon — even ‘no news yet’ — and a 10-minute Monday review with me for the next month. Does that work?”", ok: true, fb: "Specific, time-boxed, supportive and agreed." } ] }
+                      { text: "“Please keep every candidate updated from now on, and flag it if Ops is slow.”", ok: false, fb: "Clear intent, but no rhythm, no timeframe and no check-in." },
+                      { text: "“I'll check your pipeline myself each week and step in where updates are late.”", ok: false, fb: "Supportive on the surface, but you've taken the work over and Sam doesn't change the habit." },
+                      { text: "“Let's agree updates every Tuesday and Friday by noon, plus a Monday check-in. OK?”", ok: true, fb: "Specific, time-boxed, supportive, and agreed." } ] }
                   ]
                 },
                 mgr_nonops: {
@@ -954,25 +995,25 @@
                   setup: "Sam leads the MIS / reporting team in your function. For three months running, the headcount report Ops leadership relies on has been late — and this month two sites' numbers were wrong. The COO asked you about it directly. You've booked 20 minutes.",
                   steps: [
                     { label: "Context", situation: "Sam joins. How do you open?", options: [
+                      { text: "“Sam, thanks for joining — how do you feel the reporting cycle is going?”", ok: false, fb: "An open question, but it hides the purpose. Sam has to guess why you're meeting." },
                       { text: "“Sam, I want to talk about the monthly headcount report for Ops leadership.”", ok: true, fb: "Clear, specific, neutral." },
-                      { text: "“Sam, have you got a minute? Nothing major…”", ok: false, fb: "It is major — softening it confuses the message." },
-                      { text: "“Sam, I need to talk about your reliability.”", ok: false, fb: "A label about Sam — expect defensiveness." } ] },
+                      { text: "“Sam, I want to talk about how dependable the reporting has been lately.”", ok: false, fb: "“How dependable” is a judgement. Sam will defend their reliability instead of looking at the report." } ] },
                     { label: "Observation", situation: "Sam: “OK, go ahead.”", options: [
-                      { text: "“Your reports are always late.”", ok: false, fb: "“Always” invites argument about the exceptions." },
-                      { text: "“The COO thinks you're careless.”", ok: false, fb: "Second-hand and a label. Use what you observed." },
-                      { text: "“The report went out after the 5th working day three months running, and this month two sites' numbers were wrong.”", ok: true, fb: "Specific, verifiable and it names the pattern." } ] },
+                      { text: "“The report has been running late for a while, and there have been some errors.”", ok: false, fb: "How late? Which errors? Too vague to act on." },
+                      { text: "“It went out after day 5 three months running, and two sites' numbers were wrong.”", ok: true, fb: "Specific, verifiable, and it names the pattern." },
+                      { text: "“The COO feels the report can't be trusted and asked me what's going on.”", ok: false, fb: "Second-hand, and it's an opinion. Use what you observed." } ] },
                     { label: "Impact", situation: "Sam nods slowly. What was the impact?", options: [
-                      { text: "“It's not the standard I expect.”", ok: false, fb: "A judgement — not a consequence Sam can see." },
-                      { text: "“Ops made staffing decisions on stale data, and the COO asked me directly why the numbers didn't match.”", ok: true, fb: "Business impact and leadership visibility — clear stakes." },
-                      { text: "“It's embarrassing for me.”", ok: false, fb: "That centres you, not the business." } ] },
+                      { text: "“The COO asked me about it directly in front of the team, which put me in a very difficult spot.”", ok: false, fb: "That centres you, not the business." },
+                      { text: "“Ops made staffing calls on stale data, and the COO asked why numbers didn't match.”", ok: true, fb: "Business impact and leadership visibility — clear stakes." },
+                      { text: "“It isn't the standard we've agreed for reports going to senior leaders.”", ok: false, fb: "A judgement, not a consequence Sam can see." } ] },
                     { label: "Pushback", situation: "Sam pushes back: <em>“The sites send me their data late — I can't publish what I don't have.”</em>", options: [
-                      { text: "“Everyone else manages.”", ok: false, fb: "A comparison that ignores a real blocker — Sam stops listening." },
-                      { text: "“OK, then late is fine.”", ok: false, fb: "You've dropped the standard Ops depends on." },
-                      { text: "“That's a real blocker, and I should have fixed site access sooner. The report still has to be right and on time, so let's remove that dependency.”", ok: true, fb: "Acknowledge, own your part, hold the standard, move to solutions." } ] },
+                      { text: "“That's a real blocker, and I should have fixed site access sooner. Let's remove it.”", ok: true, fb: "Acknowledge, own your part, hold the standard, move to solutions." },
+                      { text: "“I understand, but other teams hit their deadlines, so it still has to be on time.”", ok: false, fb: "A comparison that ignores a real blocker — Sam stops listening." },
+                      { text: "“That's fair — let's move the deadline to day 8 so you have the site data first.”", ok: false, fb: "It sounds practical, but it quietly lowers the standard Ops depends on instead of fixing the cause." } ] },
                     { label: "Next step", situation: "Sam: “What would help?”", options: [
-                      { text: "“Let's lock a day-3 draft review with me each month, and I'll get you direct access to the WFM feed by Friday so you're not waiting on sites. Does that work?”", ok: true, fb: "Specific, supported, time-boxed and agreed." },
-                      { text: "“Just make it a priority.”", ok: false, fb: "Vague — no change in how the work happens." },
-                      { text: "“If it's late again, I'll give it to someone else.”", ok: false, fb: "A threat, not a next step." } ] }
+                      { text: "“Please treat the report as your top priority each month, and tell me what gets in the way.”", ok: false, fb: "Vague — nothing changes in how the work happens." },
+                      { text: "“Let's do a day-3 draft review each month, and I'll get you WFM access by Friday. OK?”", ok: true, fb: "Specific, supported, time-boxed and agreed." },
+                      { text: "“I'll review every report myself before it goes out to Ops leadership, starting this month.”", ok: false, fb: "You've added a check but taken ownership away from Sam, and the root cause stays." } ] }
                   ]
                 },
                 _: null
@@ -987,7 +1028,7 @@
             ]
           },
           {
-            id: "tryCoin", title: "Try It: Your COIN Opening", kicker: "05 · Try it",
+            id: "tryCoin", title: "Try It: Your COIN Opening", kicker: "Try it",
             blocks: [
               { t: "p", html: "This is the highest-value practice in the course. Think of a <strong>real</strong> conversation you need to have — with a {directs}, a peer, or an internal client. First, say your COIN opening out loud in 60 seconds — to a mirror, an empty room, or record it on your phone. Then write it down." },
               { t: "reflect", id: "r_coin", title: "Your COIN opening",
@@ -1002,23 +1043,23 @@
             ]
           },
           {
-            id: "q5", title: "Check for Understanding", kicker: "05 · Quiz",
+            id: "q5", title: "Check for Understanding", kicker: "Quiz",
             blocks: [
               { t: "quiz", id: "q_m5", questions: [
                 V({
                   ops: { q: "Which of these is a COIN Observation?",
-                    o: ["“You don't pay attention to detail.”", "“Three of your last five QA audits had the same modifier error.”", "“Everyone says your work is sloppy.”", "“You need to be more careful.”"], a: 1,
-                    why: "It's specific, measurable and describes behaviour — not personality or hearsay." },
+                    o: ["“You don't seem to be paying attention to modifiers lately.”", "“Three of your last five QA audits had the same modifier error.”", "“QA tells me your quality has been slipping for the last few weeks.”", "“You need to be more careful with modifiers on every claim.”"], a: 1,
+                    why: "It's specific, measurable and first-hand. The others are an interpretation, second-hand, or an instruction rather than an observation." },
                   nonops: { q: "Which of these is a COIN Observation?",
-                    o: ["“You don't pay attention to detail.”", "“Three of your last five offer letters had the wrong shift code.”", "“Everyone says your work is sloppy.”", "“You need to be more careful.”"], a: 1,
-                    why: "It's specific, measurable and describes behaviour — not personality or hearsay." }
+                    o: ["“You don't seem to be paying attention to offer letters lately.”", "“Three of your last five offer letters had the wrong shift code.”", "“Hiring managers tell me your letters have been slipping lately.”", "“You need to be more careful with shift codes on every letter.”"], a: 1,
+                    why: "It's specific, measurable and first-hand. The others are an interpretation, second-hand, or an instruction rather than an observation." }
                 }),
                 { q: "Which parts of COIN keep a difficult conversation objective?",
                   o: ["Context + Next step", "Observation + Impact", "Context + Observation", "Impact + Next step"], a: 1,
                   why: "Observation and Impact are facts and consequences — they keep it about what happened, not who the person is." },
                 { q: "{Boss} asks what went wrong on a missed deadline. Which pattern should you move toward?",
-                  o: ["Explain + defend + reassure", "Fact → Ownership → Action", "Apologise → explain → wait", "Context → Blame → Fix"], a: 1,
-                  why: "Here's what happened, here's what we've done, here's what happens next." }
+                  o: ["Explain → Defend → Reassure", "Fact → Ownership → Action", "Apologise → Explain → Wait", "Context → Cause → Promise"], a: 1,
+                  why: "Here's what happened, here's what we've done, here's what happens next. “Cause → Promise” sounds close, but a promise isn't an action already under way." }
               ]}
             ]
           }
@@ -1027,10 +1068,10 @@
 
       /* ================================================================== */
       {
-        id: "m6", num: "06", title: "Integrate: The 90-Second Update", minutes: 9,
+        id: "m6", num: "6", title: "Integrate: The 90-Second Update", minutes: 9,
         steps: [
           {
-            id: "toolkit", title: "Putting It All Together", kicker: "06 · Integrate",
+            id: "toolkit", title: "Putting It All Together", kicker: "Integrate",
             blocks: [
               { t: "cards", cols: 3, items: [
                 { title: "SBAR", text: "High-stakes updates.<br>Situation → Background → Assessment → Recommendation" },
@@ -1050,7 +1091,7 @@
             ]
           },
           {
-            id: "seq2", title: "Build a 90-Second Update", kicker: "06 · Activity",
+            id: "seq2", title: "Build a 90-Second Update", kicker: "Activity",
             blocks: [
               { t: "p", html: "A strong 90-second update opens with the point — not the history or a greeting — runs <strong>Fact → Impact → Your view → Action → Ask</strong>, and closes with <em>“My recommendation is X. I need Y from you by Z.”</em>" },
               { t: "activity", a: {
@@ -1102,41 +1143,41 @@
             ]
           },
           {
-            id: "q6", title: "Check for Understanding", kicker: "06 · Quiz",
+            id: "q6", title: "Check for Understanding", kicker: "Quiz",
             blocks: [
               { t: "quiz", id: "q_m6", questions: [
                 { q: "Where should a 90-second update start?",
-                  o: ["With a greeting and small talk", "With the history of the issue", "With the point — what they need to know", "With an apology"], a: 2,
-                  why: "Open with the point so the listener knows why you're talking." },
+                  o: ["With the background, so the point makes sense", "With the point — what they need to know", "With a quick recap of your last update", "With the ask, so they know what you need"], a: 1,
+                  why: "Open with the point so the listener knows why you're talking. The ask comes at the close, once they understand what it's for." },
                 { q: "In the five-part model, SBAR's Recommendation maps to…",
-                  o: ["Fact", "Impact", "Your view", "Action and Ask"], a: 3,
-                  why: "Recommendation is what you're doing plus what you need." },
+                  o: ["Fact and Impact", "Impact and Your view", "Your view only", "Action and Ask"], a: 3,
+                  why: "Recommendation is what you're doing plus what you need. Your view maps to Assessment." },
                 V({
                   tl_ops: { q: "Which of these should you <strong>decide yourself</strong> as a Team Leader, then inform your manager?",
-                    o: ["Approving overtime for the team", "Re-prioritising today's queue to work the oldest accounts first", "Changing a client's SLA", "Borrowing callers from another team"], a: 1,
+                    o: ["Approving overtime for three of your callers this weekend", "Re-prioritising today's queue to the oldest accounts", "Agreeing a revised turnaround time with the client", "Borrowing two callers from another team for a week"], a: 1,
                     why: "Daily queue priorities are yours to own. Overtime spend, client commitments and cross-team resourcing need your manager — bring those as SBAR with a recommendation." },
                   mgr_ops: { q: "Which of these should you <strong>decide yourself</strong> as a Manager, then inform your director?",
-                    o: ["Moving callers between your own teams for a week", "Changing the client contract terms", "A department-wide hiring freeze", "Approving budget beyond your authority"], a: 0,
+                    o: ["Moving callers between your own teams for a week", "Agreeing revised contract terms with the client", "Pausing hiring across the whole department", "Approving spend above your authority limit"], a: 0,
                     why: "Resourcing across your own teams is yours. Contract, policy and budget beyond your authority go to your director — as SBAR with a recommendation." },
                   tl_nonops: { q: "Which of these should you <strong>decide yourself</strong> as a Team Leader, then inform your manager?",
-                    o: ["Changing a company-wide HR or IT policy", "Re-prioritising your team's queue by Ops go-live dates", "Approving a new vendor contract", "Moving an Ops start date"], a: 1,
+                    o: ["Changing the approval policy for all IT requests", "Re-prioritising your queue by Ops go-live dates", "Signing up a new vendor for background checks", "Moving an Ops new-hire start date by a week"], a: 1,
                     why: "Your team's daily priorities are yours to own. Policy, vendor spend and anything that changes Ops commitments needs your manager — bring it as SBAR with a recommendation." },
                   mgr_nonops: { q: "Which of these should you <strong>decide yourself</strong> as a Manager, then inform your director?",
-                    o: ["Redesigning your own team's intake process", "Changing a company-wide compensation policy", "Signing a contract above your approval limit", "Delaying an Ops go-live across all sites"], a: 0,
+                    o: ["Redesigning your own team's intake process", "Changing the company-wide compensation policy", "Signing a contract above your approval limit", "Delaying an Ops go-live across every site"], a: 0,
                     why: "Your function's processes are yours. Policy, spend above your limit and Ops-wide commitments go to your director — as SBAR with a recommendation." }
                 })
               ]}
             ]
           },
           {
-            id: "checklist", title: "Your Communication Checklist", kicker: "06 · Keep this",
+            id: "checklist", title: "Your Communication Checklist", kicker: "Keep this",
             blocks: [
               { t: "p", html: "Use this before your next update to {boss}, client or Ops call, or escalation. It's included in your PDF download — keep it somewhere you'll see it again." },
               { t: "checklist", items: ["Did I lead with the point?", "Did I explain why it matters?", "Did I separate facts from assumptions?", "Did I adapt the message to the stakeholder?", "Did I show ownership and control?", "Did I make the next step visible?", "Did I make the ask explicit?"] }
             ]
           },
           {
-            id: "commit", title: "My 3 Communication Commitments", kicker: "06 · Action",
+            id: "commit", title: "My 3 Communication Commitments", kicker: "Action",
             blocks: [
               { t: "p", html: "Write something <strong>real</strong> — something that's actually in your calendar or inbox right now. “Communicate better” isn't specific enough: push yourself to one concrete behaviour per line." },
               { t: "reflect", id: "r_commit", title: "My commitments (3–4 minutes)",
@@ -1164,7 +1205,7 @@
 
       /* ================================================================== */
       {
-        id: "m7", num: "07", title: "Knowledge Check & Certificate", minutes: 8,
+        id: "m7", num: "7", title: "Knowledge Check & Certificate", minutes: 8,
         steps: [
           {
             id: "final", title: "Final Knowledge Check", kicker: "Graded · 80% to pass",
@@ -1173,56 +1214,56 @@
               { t: "final", id: "final", questions: [
                 V({
                   ops: { q: "Which statement reaches the <strong>Insight</strong> level — not just Information, not yet Influence?",
-                    o: ["“Clean-claim rate is 91% this week.”", "“Clean-claim rate fell 4 points after the new registration form went live.”", "“Clean-claim rate fell 4 points; we've retrained the front-end team and will be back to 95% by Friday.”", "“Clean-claim rate is a key KPI for the client.”"], a: 1,
-                    why: "Insight explains why it happened. The third option goes further, into Influence." },
+                    o: ["“Clean-claim rate is 91% this week, down from 95% last week.”", "“Clean-claim rate fell 4 points after the new registration form went live.”", "“Clean-claim rate fell 4 points; we're retraining front-end staff this week.”", "“Clean-claim rate is the client's most closely watched KPI.”"], a: 1,
+                    why: "Insight explains <em>why</em> it happened. A trend is still Information; adding the action moves it to Influence." },
                   nonops: { q: "Which statement reaches the <strong>Insight</strong> level — not just Information, not yet Influence?",
-                    o: ["“Time-to-fill is 38 days.”", "“Time-to-fill rose 9 days after two sourcing partners paused.”", "“Time-to-fill rose 9 days; we've launched a referral drive and expect 30 days by month-end.”", "“Time-to-fill is a key KPI for Ops.”"], a: 1,
-                    why: "Insight explains why it happened. The third option goes further, into Influence." }
+                    o: ["“Time-to-fill is 38 days this month, up from 29 last month.”", "“Time-to-fill rose 9 days after two sourcing partners paused.”", "“Time-to-fill rose 9 days; we're launching a referral drive Monday.”", "“Time-to-fill is the Ops leadership team's most watched KPI.”"], a: 1,
+                    why: "Insight explains <em>why</em> it happened. A trend is still Information; adding the action moves it to Influence." }
                 }),
                 V({
                   ops: { q: "You message {boss}: “The team is looking into the denial increase.” What's most missing?",
-                    o: ["More background on the payer", "An apology for the increase", "Assessment, ownership and a clear ask", "A spreadsheet of affected claims"], a: 2,
+                    o: ["Enough background on the payer change", "Recognition of the team's extra effort", "Assessment, ownership and a clear ask", "The full list of affected claims"], a: 2,
                     why: "It's “reporter” communication — it leaves the reader to do the thinking." },
                   nonops: { q: "You message {boss}: “The team is looking into the ticket increase.” What's most missing?",
-                    o: ["More background on the VPN change", "An apology for the increase", "Assessment, ownership and a clear ask", "A spreadsheet of affected tickets"], a: 2,
+                    o: ["Enough background on the VPN change", "Recognition of the team's extra effort", "Assessment, ownership and a clear ask", "The full list of affected tickets"], a: 2,
                     why: "It's “reporter” communication — it leaves the reader to do the thinking." }
                 }),
                 V({
                   ops: { q: "In an SBAR update, “The CMS modifier update went live Monday” is which element?",
-                    o: ["Situation", "Background", "Assessment", "Recommendation"], a: 1, why: "It's context that explains the situation — Background." },
+                    o: ["Situation", "Background", "Assessment", "Recommendation"], a: 1, why: "It's context that explains the situation — Background. The Situation is what's happening now (the denial spike)." },
                   nonops: { q: "In an SBAR update, “The shift-allowance code changed in the new payroll system on the 1st” is which element?",
-                    o: ["Situation", "Background", "Assessment", "Recommendation"], a: 1, why: "It's context that explains the situation — Background." }
+                    o: ["Situation", "Background", "Assessment", "Recommendation"], a: 1, why: "It's context that explains the situation — Background. The Situation is what's happening now (the short payments)." }
                 }),
                 V({
                   ops: { q: "“We've already identified the cause and put a recovery plan in place — here's where things stand.” Which audience is this opening built for?",
-                    o: ["{Boss} — impact + risk", "Your team — action + clarity", "A peer — shared impact", "The client — confidence + ownership + control"], a: 3,
-                    why: "It leads with what's already been done — the confidence and control a client needs." },
+                    o: ["{Boss} — impact, risk and the number", "Your team — action and today's priorities", "A peer — shared impact and alignment", "The client — confidence and control"], a: 3,
+                    why: "It leads with what's already been done — the confidence and control a client needs. {Boss} would expect the number and the risk first." },
                   nonops: { q: "“We've found why requests have been slow, and you'll see turnaround back to normal by the 30th.” Which audience is this opening built for?",
-                    o: ["{Boss} — impact + risk", "Your team — action + clarity", "A peer support team — shared impact", "Ops, your internal client — confidence + control"], a: 3,
+                    o: ["{Boss} — impact, risk and the number", "Your team — action and today's priorities", "A peer team — shared impact and alignment", "Ops, your internal client — confidence"], a: 3,
                     why: "It leads with what's been done and what they'll see — the confidence and control an internal client needs." }
                 }),
                 { q: "What should you lead with when updating a peer?",
-                  o: ["The dollar value at risk", "What affects them and where you need to align", "Your full action plan", "Who caused the problem"], a: 1,
-                  why: "Peers need alignment and shared impact." },
+                  o: ["The dollar value at risk across both teams", "What affects them and where you need to align", "Your team's complete recovery plan and dates", "Where the problem started and who owns it"], a: 1,
+                  why: "Peers need alignment and shared impact. Where it started and who owns it turns the conversation to blame." },
                 { q: "Which is the best rewrite of “Hopefully we'll have it done by Friday”?",
-                  o: ["“We will definitely, absolutely have it done.”", "“Hopefully by Friday, fingers crossed.”", "“We'll have it done by Friday 5 PM.”", "“It should be done soon.”"], a: 2,
-                  why: "Specific commitment with a clear deadline — confident without over-promising." },
+                  o: ["“We'll definitely, absolutely have it done by Friday.”", "“We should have it done by around Friday afternoon.”", "“We'll have it done by Friday 5 PM.”", "“We're aiming for Friday, depending on volumes.”"], a: 2,
+                  why: "A specific commitment with a clear deadline. Over-emphasis sounds anxious, and “should… around” and “aiming for” are still hedges." },
                 { q: "In a COIN conversation, your {directs} says “It wasn't entirely my fault.” What's the strongest response?",
-                  o: ["“That's not really the point.”", "“OK, let's leave it this time.”", "“I hear you — that was real and I should have spotted it sooner. The work still needs to happen, so let's work out how.”", "“Everyone else managed.”"], a: 2,
-                  why: "Acknowledge what's true, own your part, return to the next step." },
+                  o: ["“I understand, but the deadline was clear, so let's stick to the facts of what happened.”", "“That's fair — the load was heavy, so let's leave this one and start fresh next week.”", "“That load was real, and I missed it. The work still needs doing — let's plan how.”", "“Let's not get into fault — everyone else on the team managed to finish their list.”"], a: 2,
+                  why: "Acknowledge what's true, own your part, return to the next step. The others dismiss, drop accountability, or compare." },
                 V({
                   tl: { q: "Which of these is a proper COIN <strong>Next step</strong>?",
-                    o: ["“Just be more careful from now on.”", "“Let's do a 10-minute check-in at 4 PM daily for two weeks — does that work?”", "“I'm disappointed in you.”", "“Next time I'll have to escalate.”"], a: 1,
-                    why: "Specific action, timeframe and a check for agreement." },
+                    o: ["“From now on, please make your follow-ups the first priority every single day.”", "“Let's do a 10-minute 4 PM check-in daily for two weeks — does that work?”", "“I'll keep a close eye on your list and flag anything I notice to you.”", "“If it happens again this month, I'll need to escalate it formally.”"], a: 1,
+                    why: "A specific action, a timeframe, your support, and a check for agreement. The others are vague, one-sided, or a threat." },
                   mgr: { q: "Which of these is a proper COIN <strong>Next step</strong> with one of your Team Leaders?",
-                    o: ["“Just be more careful from now on.”", "“Let's do a 10-minute pre-call review before every client or Ops call this month — does that work?”", "“I'm disappointed in you.”", "“Next time I'll take over.”"], a: 1,
-                    why: "Specific action, timeframe, your support and a check for agreement." }
+                    o: ["“From now on, please make client updates your first priority every single week.”", "“Let's do a 10-minute pre-call review before each client call this month — OK?”", "“I'll sit in on your client calls for a while and flag anything I happen to notice.”", "“If it happens again this month, I'll need to reassign the account.”"], a: 1,
+                    why: "A specific action, a timeframe, your support, and a check for agreement. The others are vague, take the work over, or are a threat." }
                 }),
                 { q: "Under pressure, “We'll take care of it” is an example of which drift?",
                   o: ["Defensive", "Vague", "Blaming", "Ownership"], a: 1,
                   why: "It sounds like ownership but says nothing about what, who or when. Move to Fact → Ownership → Action." },
                 { q: "Why does “My recommendation is X. I need Y from you by Z.” make a strong close?",
-                  o: ["It's polite", "It states your view and a specific ask with a deadline", "It keeps the update under 90 seconds", "It avoids committing to anything"], a: 1,
+                  o: ["It's polite and shows respect for the leader's time", "It states your view and a specific ask with a deadline", "It keeps the whole update comfortably under 90 seconds", "It leaves the final decision entirely with the leader"], a: 1,
                   why: "It makes both your judgement and your ask impossible to miss." }
               ]}
             ]

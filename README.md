@@ -19,22 +19,22 @@ Each path has its own examples, scenarios, stakeholders, "decide or escalate" gu
 
 ## Structure
 
-| Module | Content | Activity types |
+| Module (sidebar number) | Content | Activity types |
 |---|---|---|
-| 00 Start Here | Path picker, outcomes, opening confidence check | Scale, reflection |
-| 01 Mindset | Information → Insight → Influence, Master Message Model | Bucket sort, flip cards, try-it, find-the-ask hunt, quiz |
-| 02 Structure | SBAR, what not to do, decide-or-escalate | Sequence, reveal, try-it, quiz |
-| 03 Adapt | Stakeholder translation | Match-with-lines (1:1, all labels unique), try-it, quiz |
-| 04 Presence | Five C's, language detox, when you don't know | Flip cards, bucket sort, try-it, quiz |
-| 05 Navigate | COIN, behaviour vs label | Bucket sort, **branching simulation**, try-it, quiz |
-| 06 Integrate | 5-part model, 90-second update, checklist, commitments | Choice, sequence, quiz, checklist, reflection, closing confidence check |
-| 07 Finish | Graded Knowledge Check (10 Qs, 80% to pass, retakes allowed) | Final quiz, certificate (PNG), PDF of answers |
+| Start Here (no number) | Path picker, outcomes, opening confidence check | Scale, reflection |
+| 1 Mindset | Information → Insight → Influence, Master Message Model | Bucket sort, flip cards, try-it, find-the-ask hunt, quiz |
+| 2 Structure | SBAR, what not to do, decide-or-escalate | Sequence, reveal, try-it, quiz |
+| 3 Adapt | Stakeholder translation | Match-with-lines (1:1, all labels unique), try-it, quiz |
+| 4 Presence | Five C's, language detox, when you don't know | Flip cards, bucket sort, try-it, quiz |
+| 5 Navigate | COIN, behaviour vs label | Bucket sort, **branching simulation**, try-it, quiz |
+| 6 Integrate | 5-part model, 90-second update, checklist, commitments | Choice, sequence, quiz, checklist, reflection, closing confidence check |
+| 7 Finish | Graded Knowledge Check (10 Qs, 80% to pass, retakes allowed) | Final quiz, certificate (PNG), PDF of answers |
 
 ## Files
 
 ```
 index.html            page shell. Every CSS/JS tag carries ?v=N
-css/styles.css        brand palette tokens and layout; responsive rules at 860px and 640px
+css/styles.css        palette tokens (navy → teal, green completion) and layout; responsive rules at 960, 860 and 640px
 js/course-data.js     ALL content, including per-path variants (edit this to change wording)
 js/activities.js      activity renderers: flip, bucket, sequence, match, hunt, sim
 js/app.js             engine: state, gating, timer, quizzes, certificate, PDF
@@ -61,6 +61,13 @@ Activity design rules followed in this course:
 ## ⚠️ When you update the site: bump the version
 
 Browsers cache CSS/JS aggressively. After **any** change to a CSS or JS file, raise the number in **every** `?v=N` in `index.html` (for example `?v=11` → `?v=12`) before pushing. If a fix "isn't showing up", check in DevTools → Network that the new `?v=` was loaded before assuming the code is wrong.
+
+## Answer integrity
+
+- **Reflections are mandatory.** Every try-it and reflection box must be submitted before Continue unlocks, and one-word answers like "ok" are rejected. There's no skip option, and the page doesn't label them as required.
+- **Paste and drag-drop are blocked in answer boxes.** Learners see: *"Pasting is turned off here — please type your answer in your own words."*
+- **Course text can't be selected or copied,** including questions, scenarios and options. The name fields are the only exception. This stops the quick copy-into-an-AI shortcut, but it can't stop someone retyping text or taking a screenshot.
+- **Multiple-choice options are shuffled once per learner,** and a Knowledge Check retake gets a fresh shuffle. Distractors are written to be the same length as the correct answer. Across all paths, the correct option is the longest about as often as it's the shortest.
 
 ## Learner data and privacy
 

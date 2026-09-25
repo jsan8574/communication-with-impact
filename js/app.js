@@ -591,12 +591,12 @@
     ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
     spaced(true); ctx.fillStyle = "#0F6E73"; ctx.font = F(700, 34); ctx.fillText(RAW.program.toUpperCase(), W / 2, 250);
     spaced(false); ctx.fillStyle = "#0B2545"; ctx.font = F(700, 96); ctx.fillText("Certificate of Completion", W / 2, 370);
-    ctx.fillStyle = "#7D8A90"; ctx.font = F(400, 38, true); ctx.fillText("This certifies that", W / 2, 470);
+    ctx.fillStyle = "#5A6878"; ctx.font = F(400, 38, true); ctx.fillText("This certifies that", W / 2, 470);
     const name = (store.name || "").trim() || "Your Name";
     let ns = 110; ctx.font = F(700, ns); while (ctx.measureText(name).width > W - 400 && ns > 50) { ns -= 4; ctx.font = F(700, ns); }
     ctx.fillStyle = (store.name || "").trim() ? "#1B1924" : "#AAA7BA"; ctx.fillText(name, W / 2, 600);
     ctx.strokeStyle = "#1AA0A6"; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(W / 2 - 520, 640); ctx.lineTo(W / 2 + 520, 640); ctx.stroke();
-    ctx.fillStyle = "#7D8A90"; ctx.font = F(400, 38, true); ctx.fillText("has successfully completed", W / 2, 715);
+    ctx.fillStyle = "#5A6878"; ctx.font = F(400, 38, true); ctx.fillText("has successfully completed", W / 2, 715);
     ctx.fillStyle = "#0B2545"; ctx.font = F(700, 72); ctx.fillText(RAW.title, W / 2, 810);
     spaced(true); ctx.fillStyle = "#1D5F8A"; ctx.font = F(600, 30); ctx.fillText(`${roleLabel()} · ${fnLabel()}`.toUpperCase(), W / 2, 870); spaced(false);
     const doneAt = (p.final && p.final.passedAt) || Date.now();
@@ -606,9 +606,9 @@
       const x = x0 + i * cw;
       if (i) { ctx.strokeStyle = "#D1DBE5"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x - cw / 2, 975); ctx.lineTo(x - cw / 2, 1105); ctx.stroke(); }
       ctx.fillStyle = "#0B2545"; ctx.font = F(700, 56); ctx.fillText(v, x, 1050);
-      spaced(true); ctx.fillStyle = "#7D8A90"; ctx.font = F(600, 22); ctx.fillText(l, x, 1095); spaced(false);
+      spaced(true); ctx.fillStyle = "#5A6878"; ctx.font = F(600, 22); ctx.fillText(l, x, 1095); spaced(false);
     });
-    ctx.fillStyle = "#7D8A90"; ctx.font = F(400, 22); ctx.fillText(RAW.copyright, W / 2, H - 140);
+    ctx.fillStyle = "#5A6878"; ctx.font = F(400, 22); ctx.fillText(RAW.copyright, W / 2, H - 140);
   }
 
   /* ---------------- PDF of answers (jsPDF loaded on demand) ---------------- */

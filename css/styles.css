@@ -8,7 +8,7 @@
 
 /* ===== Brand tokens: navy → teal, green for completion. Minimal, premium: hairlines over shadows. ===== */
 :root {
-  --ink: #0F2A44;        --ink-2: #3A4E63;      --muted: #6A7A8B;
+  --ink: #0F2A44;        --ink-2: #3A4E63;      --muted: #5A6878;
   --navy: #0B2545;       --navy-2: #173A5E;
   --teal: #0F6E80;       --teal-2: #0B5563;     --teal-bright: #1AA0A6;  --teal-soft: #EAF5F6;  --teal-line: #BFE0E4;
   --green: #2E9063;      --green-2: #1F7A4D;    --green-soft: #E6F4EC;

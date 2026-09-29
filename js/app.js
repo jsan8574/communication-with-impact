@@ -551,7 +551,7 @@
     const fieldBox = h("div", { class: "field" }, h("label", { for: "cert-name", text: "Name as it should appear on your certificate" }), inp);
     const msg = h("div", { class: "msg", role: "status", "aria-live": "polite" });
     const canvas = h("canvas", { width: 2000, height: 1414, "aria-label": "Certificate preview" });
-    const dl = h("button", { class: "btn", text: "Download my certificate & answers" });
+    const dl = h("button", { class: "btn", text: "Download Certificate and Answers" });
     const pdfBtn = h("button", { class: "btn secondary", text: "Download PDF of my answers" });
     pdfBtn.addEventListener("click", downloadPDF);
     panel.append(h("div", { class: "pt", text: "Your certificate" }));

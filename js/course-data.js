@@ -22,6 +22,12 @@
       issuer: "HealthRecon Connect Learning & Development",
       logo: "assets/hrc-logo.png"
     },
+    // completion submission — a static site can't send mail, so this opens the learner's own email app pre-filled
+    submission: {
+      to: "learning@healthreconconnect.com",
+      cc: ["jimmarb@healthreconconnect.com", "rekhak@healthreconconnect.com", "zameera@healthreconconnect.com"],
+      domain: "healthreconconnect.com"
+    },
     title: "Communication with Impact",
     subtitle: "From Information to Influence",
     copyright: "©2026 HealthRecon Connect LLC. All rights reserved | Confidential",

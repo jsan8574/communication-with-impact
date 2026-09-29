@@ -561,22 +561,28 @@
     }
     let t = null;
     inp.addEventListener("input", () => { store.name = inp.value; save(); fieldBox.classList.remove("err"); clearTimeout(t); t = setTimeout(() => drawCert(canvas), 200); });
-    dl.addEventListener("click", async () => {
-      if (!(store.name || "").trim()) { fieldBox.classList.add("err"); msg.className = "msg err"; msg.textContent = "✕ Enter your name first — it's printed on the certificate."; inp.focus(); return; }
-      msg.className = "msg"; msg.textContent = "";
+    const needName = () => {
+      if ((store.name || "").trim()) return true;
+      fieldBox.classList.add("err"); msg.className = "msg err"; msg.textContent = "✕ Enter your name first — it's printed on the certificate."; inp.focus(); return false;
+    };
+    const certFile = () => `Certificate - ${RAW.title} - ${store.name.trim()}.png`.replace(/[\\/:*?"<>|]/g, "");
+    const saveCert = async () => {
       await drawCert(canvas);
-      canvas.toBlob((blob) => {
-        const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
-        a.download = `Certificate - ${RAW.title} - ${store.name.trim()}.png`.replace(/[\\/:*?"<>|]/g, "");
-        document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
-        msg.className = "msg ok"; msg.textContent = "✓ Certificate downloaded.";
-      }, "image/png");
+      return new Promise((res) => canvas.toBlob((blob) => {
+        const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = certFile();
+        document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); res(true);
+      }, "image/png"));
+    };
+    dl.addEventListener("click", async () => {
+      if (!needName()) return;
+      msg.className = "msg"; msg.textContent = "";
+      await saveCert(); msg.className = "msg ok"; msg.textContent = "✓ Certificate downloaded.";
     });
     const idNote = h("p", { class: "note", style: "margin:12px 0 0" });
     const setId = () => { idNote.textContent = `Certificate ID ${certId()} — this links your certificate to your record with Learning & Development.`; };
     inp.addEventListener("input", setId); setId();
     panel.append(fieldBox, h("div", { class: "cert-wrap" }, canvas), idNote, h("div", { class: "btn-row" }, dl, pdfBtn), msg);
-    wrap.append(panel);
+    wrap.append(panel, submitPanel(needName, saveCert, certFile));
     drawCert(canvas);
     return wrap;
   }
@@ -593,6 +599,68 @@
     if (logoImg) return logoImg;
     logoImg = new Promise((res) => { const im = new Image(); im.onload = () => res(im); im.onerror = () => res(null); im.src = RAW.certificate.logo; });
     return logoImg;
+  }
+  // "Send to L&D": downloads both files, then opens the learner's email app pre-filled (they attach + send from their HRC account)
+  function submitPanel(needName, saveCert, certFile) {
+    const S = RAW.submission, CERT = RAW.certificate;
+    const box = h("div", { class: "panel", style: "margin-top:20px" },
+      h("div", { class: "pt", text: "Send your completion to Learning & Development" }),
+      h("div", { class: "pi", html: `This downloads your certificate and your answers, then opens a pre-filled email. <strong>Attach the two downloaded files and send it from your HRC email account.</strong>` }));
+    const em = h("input", { type: "text", id: "hrc-email", inputmode: "email", autocomplete: "email", placeholder: `yourname@${S.domain}`, maxlength: "80" });
+    em.value = store.hrcEmail || "";
+    const emBox = h("div", { class: "field" }, h("label", { for: "hrc-email", text: "Your HRC email address" }), em);
+    const msg = h("div", { class: "msg", role: "status", "aria-live": "polite" });
+    em.addEventListener("input", () => { store.hrcEmail = em.value.trim(); save(); emBox.classList.remove("err"); });
+    const validEmail = (v) => new RegExp(`^[^\\s@]+@${S.domain.replace(/\./g, "\\.")}$`, "i").test(v);
+    const btn = h("button", { class: "btn", text: "Download files & open email" });
+    const recip = h("div", { class: "note", style: "margin-top:12px" },
+      h("div", {}, h("strong", { text: "To: " }), S.to), h("div", {}, h("strong", { text: "Cc: " }), S.cc.join(", ")), h("div", {}, h("strong", { text: "Subject: " }), h("span", { class: "subj" })));
+    const subject = () => `${CERT.series} | ${RAW.title} | Completion – ${(store.name || "").trim() || "[Your name]"}`;
+    const refreshSubj = () => { recip.querySelector(".subj").textContent = subject(); };
+    document.addEventListener("input", (e) => { if (e.target && e.target.id === "cert-name") refreshSubj(); });
+    refreshSubj();
+    const body = () => {
+      const p = P(), sc = scores(), when = new Date((p.final && p.final.passedAt) || Date.now()).toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric" });
+      const pdfName = `${RAW.title} - My Answers - ${roleLabel()} ${fnLabel()}.pdf`.replace(/[\\/:*?"<>|]/g, "");
+      return [
+        "Hi Learning & Development team,", "",
+        `Please find attached my certificate and answers for ${RAW.title} (${CERT.series}).`, "",
+        `Name: ${store.name.trim()}`,
+        `HRC email: ${em.value.trim()}`,
+        `Path: ${roleLabel()} · ${fnLabel()}`,
+        `Pillar / Competency: ${CERT.pillar} / ${CERT.competency}`,
+        `Knowledge Check (best): ${sc.final != null ? sc.final + "%" : "—"}`,
+        `Time invested: ${fmtTime(p.secs)}`,
+        `Date completed: ${when}`,
+        `Certificate ID: ${certId()}`, "",
+        "Attached:",
+        `1. ${certFile()}`,
+        `2. ${pdfName}`, "",
+        "Thank you,", store.name.trim()
+      ].join("\r\n");
+    };
+    const mailto = () => `mailto:${S.to}?cc=${S.cc.join(",")}&subject=${encodeURIComponent(subject())}&body=${encodeURIComponent(body())}`;
+    btn.addEventListener("click", async () => {
+      if (!needName()) { msg.className = "msg err"; msg.textContent = "✕ Add your name in the certificate section above first."; return; }
+      if (!validEmail(em.value.trim())) { emBox.classList.add("err"); msg.className = "msg err"; msg.textContent = `✕ Enter your HRC email address (ending in @${S.domain}).`; em.focus(); return; }
+      btn.disabled = true; msg.className = "msg"; msg.textContent = "Preparing your files…";
+      await saveCert();
+      const ok = await downloadPDF();
+      btn.disabled = false;
+      if (ok === false) { msg.className = "msg err"; msg.textContent = "✕ Your answers PDF couldn't be created — check your connection and try again."; return; }
+      msg.className = "msg ok";
+      msg.innerHTML = `✓ Both files are in your Downloads folder. Your email app should open now — <strong>attach both files</strong> and send from <strong>${em.value.trim()}</strong>. If nothing opens, use “Copy email details” and paste them into Outlook.`;
+      store.submittedAt = Date.now(); saveNow();
+      setTimeout(() => { window.location.href = mailto(); }, 600);
+    });
+    const copyBtn = h("button", { class: "btn ghost", text: "Copy email details" });
+    copyBtn.addEventListener("click", async () => {
+      const txt = `To: ${S.to}\nCc: ${S.cc.join("; ")}\nSubject: ${subject()}\n\n${body().replace(/\r\n/g, "\n")}`;
+      try { await navigator.clipboard.writeText(txt); msg.className = "msg ok"; msg.textContent = "✓ Email details copied — paste them into a new Outlook email and attach both files."; }
+      catch (e) { msg.className = "msg err"; msg.textContent = "✕ Couldn't copy automatically — please type the details shown above."; }
+    });
+    box.append(emBox, h("div", { class: "btn-row" }, btn, copyBtn), recip, msg);
+    return box;
   }
   async function drawCert(cv) {
     try { await Promise.all(["400 40px", "600 40px", "700 40px", "italic 400 40px"].map((f) => document.fonts.load(`${f} "Proxima Nova"`))); } catch (e) {}
@@ -650,8 +718,8 @@
   const plain = (t) => String(t == null ? "" : t).replace(/<br\s*\/?>/gi, "\n").replace(/<li>/gi, "\n• ").replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&")
     .replace(/→/g, "->").replace(/←/g, "<-").replace(/≠/g, "is not").replace(/[✓✔]/g, "").replace(/[✕✗]/g, "").replace(/[^\x00-\xFF‘’“”–—•…€]/g, "");
   async function downloadPDF() {
-    const p = P(); if (!p) return;
-    try { await loadJsPDF(); } catch (e) { alert("Couldn't load the PDF library — check your internet connection and try again."); return; }
+    const p = P(); if (!p) return false;
+    try { await loadJsPDF(); } catch (e) { alert("Couldn't load the PDF library — check your internet connection and try again."); return false; }
     const { jsPDF } = window.jspdf; const doc = new jsPDF({ unit: "pt", format: "a4" });
     const W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight(), M = 50; let y = M;
     const ensure = (n) => { if (y + n > H - M) { doc.addPage(); y = M; } };
@@ -708,11 +776,12 @@
     });
     text(RAW.copyright, { size: 8, color: [125, 138, 144] });
     doc.save(`${RAW.title} - My Answers - ${roleLabel()} ${fnLabel()}.pdf`.replace(/[\\/:*?"<>|]/g, ""));
+    return true;
   }
 
   /* ---------------- copy protection ---------------- */
   // Stops learners copying questions/scenarios into an AI tool. (It can't stop retyping or screenshots.)
-  const copyOK = (t) => t && t.closest && t.closest("#learner-name, #cert-name");
+  const copyOK = (t) => t && t.closest && t.closest("#learner-name, #cert-name, #hrc-email");
   ["copy", "cut"].forEach((ev) => document.addEventListener(ev, (e) => { if (!copyOK(e.target)) e.preventDefault(); }, true));
   document.addEventListener("dragstart", (e) => { if (!copyOK(e.target) && !(e.target.closest && e.target.closest(".chip"))) e.preventDefault(); }, true);
 

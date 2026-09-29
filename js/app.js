@@ -572,14 +572,32 @@
         msg.className = "msg ok"; msg.textContent = "✓ Certificate downloaded.";
       }, "image/png");
     });
-    panel.append(fieldBox, h("div", { class: "cert-wrap" }, canvas), h("div", { class: "btn-row" }, dl, pdfBtn), msg);
+    const idNote = h("p", { class: "note", style: "margin:12px 0 0" });
+    const setId = () => { idNote.textContent = `Certificate ID ${certId()} — this links your certificate to your record with Learning & Development.`; };
+    inp.addEventListener("input", setId); setId();
+    panel.append(fieldBox, h("div", { class: "cert-wrap" }, canvas), idNote, h("div", { class: "btn-row" }, dl, pdfBtn), msg);
     wrap.append(panel);
     drawCert(canvas);
     return wrap;
   }
+  // short, stable certificate ID so L&D can match a certificate to a completion record
+  function certId() {
+    const p = P(); const str = [(store.name || "").trim().toLowerCase(), RAW.id, pathKey(), p.final && p.final.passedAt, p.final && p.final.best].join("|");
+    let h1 = 0x811c9dc5, h2 = 0x01000193;
+    for (let i = 0; i < str.length; i++) { const c = str.charCodeAt(i); h1 = Math.imul(h1 ^ c, 16777619) >>> 0; h2 = Math.imul(h2 + c, 2246822519) >>> 0; }
+    const b = (h1.toString(36) + h2.toString(36)).toUpperCase().replace(/[^A-Z0-9]/g, "").padEnd(8, "0");
+    return `LS26-${b.slice(0, 4)}-${b.slice(4, 8)}`;
+  }
+  let logoImg = null;
+  function loadLogo() {
+    if (logoImg) return logoImg;
+    logoImg = new Promise((res) => { const im = new Image(); im.onload = () => res(im); im.onerror = () => res(null); im.src = RAW.certificate.logo; });
+    return logoImg;
+  }
   async function drawCert(cv) {
     try { await Promise.all(["400 40px", "600 40px", "700 40px", "italic 400 40px"].map((f) => document.fonts.load(`${f} "Proxima Nova"`))); } catch (e) {}
-    const p = P(); const sc = scores();
+    const logo = await loadLogo();
+    const p = P(); const sc = scores(); const CERT = RAW.certificate;
     const ctx = cv.getContext("2d"); const W = cv.width, H = cv.height;
     const F = (w, s, it) => `${it ? "italic " : ""}${w} ${s}px "Proxima Nova", "Helvetica Neue", Arial, sans-serif`;
     const spaced = (on) => { if ("letterSpacing" in ctx) ctx.letterSpacing = on ? "8px" : "0px"; };
@@ -587,29 +605,42 @@
     ctx.fillStyle = "#0B2545"; ctx.fillRect(0, 0, W, 28); ctx.fillRect(0, H - 28, W, 28);
     ctx.strokeStyle = "#D1DBE5"; ctx.lineWidth = 4; ctx.strokeRect(70, 90, W - 140, H - 180);
     ctx.strokeStyle = "#1AA0A6"; ctx.lineWidth = 2; ctx.strokeRect(90, 110, W - 180, H - 220);
-    const bars = ["#1D5F8A", "#1AA0A6", "#2E9063", "#0F6E80"]; bars.forEach((c, i) => { ctx.fillStyle = c; ctx.fillRect(W / 2 - 160 + i * 80, 170, 70, 10); });
+    // logo: full-colour horizontal lockup, centred at the top (the issuer's mark)
+    if (logo) { const lw = 440, lh = Math.round(logo.height * lw / logo.width); ctx.drawImage(logo, W / 2 - lw / 2, 158, lw, lh); }
     ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
-    spaced(true); ctx.fillStyle = "#0F6E73"; ctx.font = F(700, 34); ctx.fillText(RAW.program.toUpperCase(), W / 2, 250);
-    spaced(false); ctx.fillStyle = "#0B2545"; ctx.font = F(700, 96); ctx.fillText("Certificate of Completion", W / 2, 370);
-    ctx.fillStyle = "#5A6878"; ctx.font = F(400, 38, true); ctx.fillText("This certifies that", W / 2, 470);
+    spaced(true); ctx.fillStyle = "#0F6E73"; ctx.font = F(700, 32); ctx.fillText(CERT.series.toUpperCase(), W / 2, 338); spaced(false);
+    ctx.fillStyle = "#0B2545"; ctx.font = F(700, 92); ctx.fillText("Certificate of Completion", W / 2, 448);
+    ctx.fillStyle = "#5A6878"; ctx.font = F(400, 36, true); ctx.fillText("This certifies that", W / 2, 528);
     const name = (store.name || "").trim() || "Your Name";
-    let ns = 110; ctx.font = F(700, ns); while (ctx.measureText(name).width > W - 400 && ns > 50) { ns -= 4; ctx.font = F(700, ns); }
-    ctx.fillStyle = (store.name || "").trim() ? "#1B1924" : "#AAA7BA"; ctx.fillText(name, W / 2, 600);
-    ctx.strokeStyle = "#1AA0A6"; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(W / 2 - 520, 640); ctx.lineTo(W / 2 + 520, 640); ctx.stroke();
-    ctx.fillStyle = "#5A6878"; ctx.font = F(400, 38, true); ctx.fillText("has successfully completed", W / 2, 715);
-    ctx.fillStyle = "#0B2545"; ctx.font = F(700, 72); ctx.fillText(RAW.title, W / 2, 810);
-    spaced(true); ctx.fillStyle = "#1D5F8A"; ctx.font = F(600, 30); ctx.fillText(`${roleLabel()} · ${fnLabel()}`.toUpperCase(), W / 2, 870); spaced(false);
+    let ns = 104; ctx.font = F(700, ns); while (ctx.measureText(name).width > W - 400 && ns > 50) { ns -= 4; ctx.font = F(700, ns); }
+    ctx.fillStyle = (store.name || "").trim() ? "#1B1924" : "#AAA7BA"; ctx.fillText(name, W / 2, 648);
+    ctx.strokeStyle = "#1AA0A6"; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(W / 2 - 520, 684); ctx.lineTo(W / 2 + 520, 684); ctx.stroke();
+    ctx.fillStyle = "#5A6878"; ctx.font = F(400, 36, true); ctx.fillText("has successfully completed", W / 2, 748);
+    ctx.fillStyle = "#0B2545"; ctx.font = F(700, 68); ctx.fillText(RAW.title, W / 2, 834);
+    // pillar → competency, then the learner's path
+    ctx.font = F(400, 30); ctx.fillStyle = "#5A6878";
+    const pl = "Pillar: ", pv = CERT.pillar, cl = "   ·   Competency: ", cv2 = CERT.competency;
+    ctx.textAlign = "left";
+    const seg = [[pl, 400, "#5A6878"], [pv, 700, "#0F6E73"], [cl, 400, "#5A6878"], [cv2, 700, "#0F6E73"]];
+    const tw = seg.reduce((t, [txt, w]) => { ctx.font = F(w, 30); return t + ctx.measureText(txt).width; }, 0);
+    let x = W / 2 - tw / 2;
+    seg.forEach(([txt, w, col]) => { ctx.font = F(w, 30); ctx.fillStyle = col; ctx.fillText(txt, x, 896); x += ctx.measureText(txt).width; });
+    ctx.textAlign = "center";
+    spaced(true); ctx.fillStyle = "#1D5F8A"; ctx.font = F(600, 22); ctx.fillText(`${roleLabel()} · ${fnLabel()}`.toUpperCase(), W / 2, 944); spaced(false);
     const doneAt = (p.final && p.final.passedAt) || Date.now();
     const cols = [["TIME INVESTED", fmtTime(p.secs)], ["KNOWLEDGE CHECK", (sc.final != null ? sc.final : 0) + "%"], ["DATE COMPLETED", new Date(doneAt).toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric" })]];
-    const cw = 480, x0 = W / 2 - cw;
+    const cw = 540, x0 = W / 2 - cw;
     cols.forEach(([l, v], i) => {
-      const x = x0 + i * cw;
-      if (i) { ctx.strokeStyle = "#D1DBE5"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x - cw / 2, 975); ctx.lineTo(x - cw / 2, 1105); ctx.stroke(); }
-      ctx.fillStyle = "#0B2545"; ctx.font = F(700, 56); ctx.fillText(v, x, 1050);
-      spaced(true); ctx.fillStyle = "#5A6878"; ctx.font = F(600, 22); ctx.fillText(l, x, 1095); spaced(false);
+      const cx = x0 + i * cw;
+      if (i) { ctx.strokeStyle = "#D1DBE5"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(cx - cw / 2, 1000); ctx.lineTo(cx - cw / 2, 1120); ctx.stroke(); }
+      ctx.fillStyle = "#0B2545"; ctx.font = F(700, 52); ctx.fillText(v, cx, 1070);
+      spaced(true); ctx.fillStyle = "#5A6878"; ctx.font = F(600, 21); ctx.fillText(l, cx, 1110); spaced(false);
     });
-    ctx.fillStyle = "#5A6878"; ctx.font = F(400, 22); ctx.fillText(RAW.copyright, W / 2, H - 140);
+    // issuer line — marks it as an internal L&D record without "restricted" language
+    ctx.fillStyle = "#5A6878"; ctx.font = F(400, 22);
+    ctx.fillText(`Issued by ${CERT.issuer} as part of your learning record  ·  Certificate ID ${certId()}`, W / 2, H - 150);
   }
+
 
   /* ---------------- PDF of answers (jsPDF loaded on demand) ---------------- */
   function loadJsPDF() {
@@ -634,6 +665,7 @@
     text(RAW.program.toUpperCase(), { size: 9, bold: true, color: [15, 110, 115] });
     text(RAW.title + " — My Answers", { size: 20, bold: true, color: [11, 37, 69] });
     text(`${(store.name || "").trim() || "(name not entered)"}  ·  ${roleLabel()} · ${fnLabel()}  ·  ${new Date().toLocaleDateString()}`, { size: 10, color: [125, 138, 144], gap: 10 });
+    if (p.final && p.final.passed) text(`${RAW.certificate.series} · Pillar: ${RAW.certificate.pillar} · Competency: ${RAW.certificate.competency} · Certificate ID ${certId()}`, { size: 9.5, color: [15, 110, 115] });
     text(`Time invested: ${fmtTime(p.secs)}   |   Knowledge Check (best): ${sc.final != null ? sc.final + "%" + (sc.passed ? " — Passed" : "") : "not attempted"}   |   Checks for Understanding: ${sc.got}/${sc.tot} (${sc.cfuPct}%)`, { size: 10, bold: true });
     sc.rows.forEach((r) => text(`${r.label}: ${r.answered ? r.n + "/" + r.t : "not completed"}`, { size: 9.5, gap: 0 }));
     y += 6;

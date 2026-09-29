@@ -14,6 +14,14 @@
   window.COURSE = {
     id: "cwi-v1",                       // localStorage namespace
     program: "Learning Series",
+    // certificate framing — the Learning Series addresses manager-identified gaps, grouped into pillars → competencies
+    certificate: {
+      series: "Learning Series 2026",
+      pillar: "Collaborate and Elevate as a Team",
+      competency: "Communication",
+      issuer: "HealthRecon Connect Learning & Development",
+      logo: "assets/hrc-logo.png"
+    },
     title: "Communication with Impact",
     subtitle: "From Information to Influence",
     copyright: "©2026 HealthRecon Connect LLC. All rights reserved | Confidential",

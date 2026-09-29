@@ -551,7 +551,7 @@
     const fieldBox = h("div", { class: "field" }, h("label", { for: "cert-name", text: "Name as it should appear on your certificate" }), inp);
     const msg = h("div", { class: "msg", role: "status", "aria-live": "polite" });
     const canvas = h("canvas", { width: 2000, height: 1414, "aria-label": "Certificate preview" });
-    const dl = h("button", { class: "btn", text: "Download certificate (PNG)" });
+    const dl = h("button", { class: "btn", text: "Download my certificate & answers" });
     const pdfBtn = h("button", { class: "btn secondary", text: "Download PDF of my answers" });
     pdfBtn.addEventListener("click", downloadPDF);
     panel.append(h("div", { class: "pt", text: "Your certificate" }));
@@ -575,14 +575,19 @@
     };
     dl.addEventListener("click", async () => {
       if (!needName()) return;
-      msg.className = "msg"; msg.textContent = "";
-      await saveCert(); msg.className = "msg ok"; msg.textContent = "✓ Certificate downloaded.";
+      dl.disabled = true; msg.className = "msg"; msg.textContent = "Preparing your two files…";
+      await saveCert();
+      const ok = await downloadPDF();
+      dl.disabled = false;
+      if (ok === false) { msg.className = "msg err"; msg.textContent = "✕ Your certificate downloaded, but the answers PDF couldn't be created — check your connection and press the button again."; return; }
+      store.downloadedAt = Date.now(); saveNow();
+      msg.className = "msg ok"; msg.textContent = "✓ Two files saved to your Downloads folder: your certificate (PNG) and your answers (PDF). Now send both to Learning & Development — see the steps below.";
     });
     const idNote = h("p", { class: "note", style: "margin:12px 0 0" });
     const setId = () => { idNote.textContent = `Certificate ID ${certId()} — this links your certificate to your record with Learning & Development.`; };
     inp.addEventListener("input", setId); setId();
-    panel.append(fieldBox, h("div", { class: "cert-wrap" }, canvas), idNote, h("div", { class: "btn-row" }, dl, pdfBtn), msg);
-    wrap.append(panel, submitPanel(needName, saveCert, certFile));
+    panel.append(fieldBox, h("div", { class: "cert-wrap" }, canvas), idNote, h("div", { class: "btn-row" }, dl), h("p", { class: "note", style: "margin:8px 0 0", text: "Your browser may ask to allow downloading multiple files — choose Allow." }), msg);
+    wrap.append(panel, submitPanel(certFile));
     drawCert(canvas);
     return wrap;
   }
@@ -600,67 +605,28 @@
     logoImg = new Promise((res) => { const im = new Image(); im.onload = () => res(im); im.onerror = () => res(null); im.src = RAW.certificate.logo; });
     return logoImg;
   }
-  // "Send to L&D": downloads both files, then opens the learner's email app pre-filled (they attach + send from their HRC account)
-  function submitPanel(needName, saveCert, certFile) {
+  // How to submit: learners email both files from their HRC account (no automatic sending — a static site can't attach files)
+  function submitPanel(certFile) {
     const S = RAW.submission, CERT = RAW.certificate;
-    const box = h("div", { class: "panel", style: "margin-top:20px" },
+    const subject = () => `${CERT.series} | ${RAW.title} | Completion – ${(store.name || "").trim() || "[Your full name]"}`;
+    const pdfName = `${RAW.title} - My Answers - ${roleLabel()} ${fnLabel()}.pdf`.replace(/[\\/:*?"<>|]/g, "");
+    const row = (k, v, cls) => h("div", { class: "kvrow" }, h("span", { class: "k", text: k }), h("span", { class: "v copyable" + (cls ? " " + cls : ""), text: v }));
+    const subjEl = row("Subject", subject(), "subj");
+    document.addEventListener("input", (e) => { if (e.target && e.target.id === "cert-name") { subjEl.querySelector(".subj").textContent = subject(); certEl.textContent = certFile(); } });
+    const certEl = h("span", { class: "copyable", text: certFile() });
+    const steps = h("ol", { class: "send-steps" },
+      h("li", {}, h("strong", { text: "Download both files " }), "with the button above. Check your Downloads folder for:",
+        h("ul", {}, h("li", {}, certEl), h("li", {}, h("span", { class: "copyable", text: pdfName })))),
+      h("li", {}, h("strong", { text: "Open Outlook and sign in with your HRC email " }), `(ending in @${S.domain}). Completions sent from personal email accounts can't be recorded.`),
+      h("li", {}, h("strong", { text: "Create a new email " }), "addressed as follows:",
+        h("div", { class: "addr" }, row("To", S.to), row("Cc", S.cc.join("; ")), subjEl)),
+      h("li", {}, h("strong", { text: "Attach both files " }), "— the certificate and the answers PDF. Your answers PDF is required: it's how Learning & Development confirms your completion."),
+      h("li", {}, h("strong", { text: "Send. " }), "Keep a copy of both files for your own records."));
+    return h("div", { class: "panel send", style: "margin-top:20px" },
       h("div", { class: "pt", text: "Send your completion to Learning & Development" }),
-      h("div", { class: "pi", html: `This downloads your certificate and your answers, then opens a pre-filled email. <strong>Attach the two downloaded files and send it from your HRC email account.</strong>` }));
-    const em = h("input", { type: "text", id: "hrc-email", inputmode: "email", autocomplete: "email", placeholder: `yourname@${S.domain}`, maxlength: "80" });
-    em.value = store.hrcEmail || "";
-    const emBox = h("div", { class: "field" }, h("label", { for: "hrc-email", text: "Your HRC email address" }), em);
-    const msg = h("div", { class: "msg", role: "status", "aria-live": "polite" });
-    em.addEventListener("input", () => { store.hrcEmail = em.value.trim(); save(); emBox.classList.remove("err"); });
-    const validEmail = (v) => new RegExp(`^[^\\s@]+@${S.domain.replace(/\./g, "\\.")}$`, "i").test(v);
-    const btn = h("button", { class: "btn", text: "Download files & open email" });
-    const recip = h("div", { class: "note", style: "margin-top:12px" },
-      h("div", {}, h("strong", { text: "To: " }), S.to), h("div", {}, h("strong", { text: "Cc: " }), S.cc.join(", ")), h("div", {}, h("strong", { text: "Subject: " }), h("span", { class: "subj" })));
-    const subject = () => `${CERT.series} | ${RAW.title} | Completion – ${(store.name || "").trim() || "[Your name]"}`;
-    const refreshSubj = () => { recip.querySelector(".subj").textContent = subject(); };
-    document.addEventListener("input", (e) => { if (e.target && e.target.id === "cert-name") refreshSubj(); });
-    refreshSubj();
-    const body = () => {
-      const p = P(), sc = scores(), when = new Date((p.final && p.final.passedAt) || Date.now()).toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric" });
-      const pdfName = `${RAW.title} - My Answers - ${roleLabel()} ${fnLabel()}.pdf`.replace(/[\\/:*?"<>|]/g, "");
-      return [
-        "Hi Learning & Development team,", "",
-        `Please find attached my certificate and answers for ${RAW.title} (${CERT.series}).`, "",
-        `Name: ${store.name.trim()}`,
-        `HRC email: ${em.value.trim()}`,
-        `Path: ${roleLabel()} · ${fnLabel()}`,
-        `Pillar / Competency: ${CERT.pillar} / ${CERT.competency}`,
-        `Knowledge Check (best): ${sc.final != null ? sc.final + "%" : "—"}`,
-        `Time invested: ${fmtTime(p.secs)}`,
-        `Date completed: ${when}`,
-        `Certificate ID: ${certId()}`, "",
-        "Attached:",
-        `1. ${certFile()}`,
-        `2. ${pdfName}`, "",
-        "Thank you,", store.name.trim()
-      ].join("\r\n");
-    };
-    const mailto = () => `mailto:${S.to}?cc=${S.cc.join(",")}&subject=${encodeURIComponent(subject())}&body=${encodeURIComponent(body())}`;
-    btn.addEventListener("click", async () => {
-      if (!needName()) { msg.className = "msg err"; msg.textContent = "✕ Add your name in the certificate section above first."; return; }
-      if (!validEmail(em.value.trim())) { emBox.classList.add("err"); msg.className = "msg err"; msg.textContent = `✕ Enter your HRC email address (ending in @${S.domain}).`; em.focus(); return; }
-      btn.disabled = true; msg.className = "msg"; msg.textContent = "Preparing your files…";
-      await saveCert();
-      const ok = await downloadPDF();
-      btn.disabled = false;
-      if (ok === false) { msg.className = "msg err"; msg.textContent = "✕ Your answers PDF couldn't be created — check your connection and try again."; return; }
-      msg.className = "msg ok";
-      msg.innerHTML = `✓ Both files are in your Downloads folder. Your email app should open now — <strong>attach both files</strong> and send from <strong>${em.value.trim()}</strong>. If nothing opens, use “Copy email details” and paste them into Outlook.`;
-      store.submittedAt = Date.now(); saveNow();
-      setTimeout(() => { window.location.href = mailto(); }, 600);
-    });
-    const copyBtn = h("button", { class: "btn ghost", text: "Copy email details" });
-    copyBtn.addEventListener("click", async () => {
-      const txt = `To: ${S.to}\nCc: ${S.cc.join("; ")}\nSubject: ${subject()}\n\n${body().replace(/\r\n/g, "\n")}`;
-      try { await navigator.clipboard.writeText(txt); msg.className = "msg ok"; msg.textContent = "✓ Email details copied — paste them into a new Outlook email and attach both files."; }
-      catch (e) { msg.className = "msg err"; msg.textContent = "✕ Couldn't copy automatically — please type the details shown above."; }
-    });
-    box.append(emBox, h("div", { class: "btn-row" }, btn, copyBtn), recip, msg);
-    return box;
+      h("div", { class: "pi", text: "To complete this course, email your certificate and your answers PDF to the Learning & Development team." }),
+      steps,
+      h("p", { class: "note", style: "margin:14px 0 0", text: `Tip: you can select and copy the addresses and subject above. Certificate ID ${certId()}.` }));
   }
   async function drawCert(cv) {
     try { await Promise.all(["400 40px", "600 40px", "700 40px", "italic 400 40px"].map((f) => document.fonts.load(`${f} "Proxima Nova"`))); } catch (e) {}
@@ -781,7 +747,7 @@
 
   /* ---------------- copy protection ---------------- */
   // Stops learners copying questions/scenarios into an AI tool. (It can't stop retyping or screenshots.)
-  const copyOK = (t) => t && t.closest && t.closest("#learner-name, #cert-name, #hrc-email");
+  const copyOK = (t) => t && t.closest && t.closest("#learner-name, #cert-name, .copyable");
   ["copy", "cut"].forEach((ev) => document.addEventListener(ev, (e) => { if (!copyOK(e.target)) e.preventDefault(); }, true));
   document.addEventListener("dragstart", (e) => { if (!copyOK(e.target) && !(e.target.closest && e.target.closest(".chip"))) e.preventDefault(); }, true);
 

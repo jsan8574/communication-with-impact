@@ -34,6 +34,7 @@ em { font-style: italic; }
 /* course text can't be selected/copied; answer fields and the name field still can */
 main, .sidebar { -webkit-user-select: none; user-select: none; }
 main textarea, main input { -webkit-user-select: text; user-select: text; }
+main .copyable { -webkit-user-select: text; user-select: text; }
 
 /* ===== Header ===== */
 .topbar { position: sticky; top: 0; z-index: 30; height: var(--hdr); background: linear-gradient(90deg, #0B2545 0%, #0F3A5C 55%, #12697A 100%); color: #fff; display: flex; align-items: center; gap: 16px; padding: 0 24px; border-bottom: 1px solid rgba(255,255,255,.06); }
@@ -428,3 +429,15 @@ footer.foot { text-align: center; font-size: 12px; color: var(--muted); padding:
   .topbar, .sidebar, .step-nav, footer.foot { display: none !important; }
   .layout { display: block; }
 }
+
+/* send-to-L&D instructions */
+.send-steps { margin: 4px 0 0; padding-left: 22px; color: var(--ink-2); }
+.send-steps > li { margin: 0 0 14px; padding-left: 4px; }
+.send-steps > li strong { color: var(--ink); }
+.send-steps ul { margin: 6px 0 0; padding-left: 18px; font-size: 14.5px; }
+.send-steps .addr { margin-top: 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg-2); padding: 6px 14px; }
+.kvrow { display: grid; grid-template-columns: 70px 1fr; gap: 10px; padding: 7px 0; font-size: 14.5px; }
+.kvrow + .kvrow { border-top: 1px solid var(--line); }
+.kvrow .k { color: var(--muted); font-weight: 600; }
+.kvrow .v { color: var(--ink); word-break: break-word; }
+.copyable { cursor: text; }

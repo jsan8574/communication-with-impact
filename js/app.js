@@ -661,7 +661,7 @@
     });
     // issuer line — marks it as an internal L&D record without "restricted" language
     ctx.fillStyle = "#5A6878"; ctx.font = F(400, 22);
-    ctx.fillText(`Issued by ${CERT.issuer} as part of your learning record`, W / 2, H - 150);
+    ctx.fillText(`Issued by ${CERT.issuer}`, W / 2, H - 150);
   }
 
 

@@ -583,21 +583,10 @@
       store.downloadedAt = Date.now(); saveNow();
       msg.className = "msg ok"; msg.textContent = "✓ Two files saved to your Downloads folder: your certificate (PNG) and your answers (PDF). Now send both to Learning & Development — see the steps below.";
     });
-    const idNote = h("p", { class: "note", style: "margin:12px 0 0" });
-    const setId = () => { idNote.textContent = `Certificate ID ${certId()} — this links your certificate to your record with Learning & Development.`; };
-    inp.addEventListener("input", setId); setId();
-    panel.append(fieldBox, h("div", { class: "cert-wrap" }, canvas), idNote, h("div", { class: "btn-row" }, dl), h("p", { class: "note", style: "margin:8px 0 0", text: "Your browser may ask to allow downloading multiple files — choose Allow." }), msg);
+    panel.append(fieldBox, h("div", { class: "cert-wrap" }, canvas), h("div", { class: "btn-row" }, dl), h("p", { class: "note", style: "margin:8px 0 0", text: "Your browser may ask to allow downloading multiple files — choose Allow." }), msg);
     wrap.append(panel, submitPanel(certFile));
     drawCert(canvas);
     return wrap;
-  }
-  // short, stable certificate ID so L&D can match a certificate to a completion record
-  function certId() {
-    const p = P(); const str = [(store.name || "").trim().toLowerCase(), RAW.id, pathKey(), p.final && p.final.passedAt, p.final && p.final.best].join("|");
-    let h1 = 0x811c9dc5, h2 = 0x01000193;
-    for (let i = 0; i < str.length; i++) { const c = str.charCodeAt(i); h1 = Math.imul(h1 ^ c, 16777619) >>> 0; h2 = Math.imul(h2 + c, 2246822519) >>> 0; }
-    const b = (h1.toString(36) + h2.toString(36)).toUpperCase().replace(/[^A-Z0-9]/g, "").padEnd(8, "0");
-    return `LS26-${b.slice(0, 4)}-${b.slice(4, 8)}`;
   }
   let logoImg = null;
   function loadLogo() {
@@ -626,7 +615,7 @@
       h("div", { class: "pt", text: "Send your completion to Learning & Development" }),
       h("div", { class: "pi", text: "To complete this course, email your certificate and your answers PDF to the Learning & Development team." }),
       steps,
-      h("p", { class: "note", style: "margin:14px 0 0", text: `Tip: you can select and copy the addresses and subject above. Certificate ID ${certId()}.` }));
+      h("p", { class: "note", style: "margin:14px 0 0", text: "Tip: you can select and copy the addresses and subject above." }));
   }
   async function drawCert(cv) {
     try { await Promise.all(["400 40px", "600 40px", "700 40px", "italic 400 40px"].map((f) => document.fonts.load(`${f} "Proxima Nova"`))); } catch (e) {}
@@ -649,7 +638,7 @@
     let ns = 104; ctx.font = F(700, ns); while (ctx.measureText(name).width > W - 400 && ns > 50) { ns -= 4; ctx.font = F(700, ns); }
     ctx.fillStyle = (store.name || "").trim() ? "#1B1924" : "#AAA7BA"; ctx.fillText(name, W / 2, 648);
     ctx.strokeStyle = "#1AA0A6"; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(W / 2 - 520, 684); ctx.lineTo(W / 2 + 520, 684); ctx.stroke();
-    ctx.fillStyle = "#5A6878"; ctx.font = F(400, 36, true); ctx.fillText("has successfully completed", W / 2, 748);
+    ctx.fillStyle = "#5A6878"; ctx.font = F(400, 36, true); ctx.fillText("has successfully completed the self-paced module", W / 2, 748);
     ctx.fillStyle = "#0B2545"; ctx.font = F(700, 68); ctx.fillText(RAW.title, W / 2, 834);
     // pillar → competency, then the learner's path
     ctx.font = F(400, 30); ctx.fillStyle = "#5A6878";
@@ -672,7 +661,7 @@
     });
     // issuer line — marks it as an internal L&D record without "restricted" language
     ctx.fillStyle = "#5A6878"; ctx.font = F(400, 22);
-    ctx.fillText(`Issued by ${CERT.issuer} as part of your learning record  ·  Certificate ID ${certId()}`, W / 2, H - 150);
+    ctx.fillText(`Issued by ${CERT.issuer} as part of your learning record`, W / 2, H - 150);
   }
 
 
@@ -699,7 +688,7 @@
     text(RAW.program.toUpperCase(), { size: 9, bold: true, color: [15, 110, 115] });
     text(RAW.title + " — My Answers", { size: 20, bold: true, color: [11, 37, 69] });
     text(`${(store.name || "").trim() || "(name not entered)"}  ·  ${roleLabel()} · ${fnLabel()}  ·  ${new Date().toLocaleDateString()}`, { size: 10, color: [125, 138, 144], gap: 10 });
-    if (p.final && p.final.passed) text(`${RAW.certificate.series} · Pillar: ${RAW.certificate.pillar} · Competency: ${RAW.certificate.competency} · Certificate ID ${certId()}`, { size: 9.5, color: [15, 110, 115] });
+    if (p.final && p.final.passed) text(`${RAW.certificate.series} · Pillar: ${RAW.certificate.pillar} · Competency: ${RAW.certificate.competency}`, { size: 9.5, color: [15, 110, 115] });
     text(`Time invested: ${fmtTime(p.secs)}   |   Knowledge Check (best): ${sc.final != null ? sc.final + "%" + (sc.passed ? " — Passed" : "") : "not attempted"}   |   Checks for Understanding: ${sc.got}/${sc.tot} (${sc.cfuPct}%)`, { size: 10, bold: true });
     sc.rows.forEach((r) => text(`${r.label}: ${r.answered ? r.n + "/" + r.t : "not completed"}`, { size: 9.5, gap: 0 }));
     y += 6;
